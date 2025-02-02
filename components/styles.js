@@ -122,7 +122,8 @@ export const ButtonText = styled(Text)`
 
 export const MessageBox = styled(Text)`
   text-align: center;
-  font-size: 13px;
+  font-size: 15px;
+  color: ${red};
 `;
 
 export const Line = styled(Text)`

@@ -79,7 +79,7 @@ android {
 
     namespace "com.app"
     defaultConfig {
-        applicationId "com.app"
+        applicationId "com.plasdetect.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -108,6 +108,8 @@ android {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
+    implementation("com.google.firebase:firebase-analytics")
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
@@ -117,3 +119,4 @@ dependencies {
         implementation jscFlavor
     }
 }
+apply plugin: 'com.google.gms.google-services'

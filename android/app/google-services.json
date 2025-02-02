@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1060940228041",
+    "project_id": "plasdetect-web",
+    "storage_bucket": "plasdetect-web.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1060940228041:android:60f1074606f1f71c167418",
+        "android_client_info": {
+          "package_name": "com.plasdetect.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAn35JXoDbIFzlaknNivLC2Lxj8D59PbYg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
