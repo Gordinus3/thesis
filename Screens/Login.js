@@ -20,14 +20,14 @@ import {
   TextLink,
   TextLinkContent,
   Spacer,
+  SubPageTitle,
 } from './../components/styles';
-import { Image } from 'react-native';
+import { Image, ImageBackground,StyleSheet } from 'react-native';
 import { Formik } from 'formik';
 import { View } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
-import EvilIcons from 'react-native-vector-icons/EvilIcons';
-import Entypo from 'react-native-vector-icons/Entypo';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import KbAvoidWrapper from '../components/KbAvoidWrapper';
+
 
 const {brand,darklight,primary} = Colors;
 
@@ -35,68 +35,73 @@ const Login = ({navigation}) => {
     const [hidePassword, setHidePassword] = useState(true);
   
   return (
-    <StyleContainer>
-      <InnerContainer>
-        <Spacer></Spacer>
-        <Image style = {{width:300,height:200}} resizeMode="contain" source = {require('./../images/AppLogo2.jpg')}/>
-        <PageTitle>Plastesch</PageTitle>
-        <SubTitle>Account Login</SubTitle>
+    <ImageBackground source={require("./../images/bg.png")} style={styles.background}  resizeMode="cover">
+    <KbAvoidWrapper>
+      <StyleContainer>
+        <InnerContainer>
+          <Spacer></Spacer>
+          <Image style = {{width:300,height:200}} resizeMode="contain" source = {require('./../images/AppLogo2.png')}/>
+          <PageTitle>Plasdetect</PageTitle>
+          <SubPageTitle></SubPageTitle>
+          <SubTitle>Account Login</SubTitle>
 
-        <Formik
-          initialValues={{email: '', password: ''}}
-          onSubmit={(values) =>{
-              console.log(values);
-          }}
-        >
-          {({handleChange,handleBlur,handleSubmit,values}) => (
-            <StyledFormArea>
-            <MyTextInput 
-                label="Email Address"
-                icon="mail"
-                placeholder="emmanuel@gmail.com"
-                placeholderTextColor= {darklight}
-                onChangeText= {handleChange('email')}
-                onBlur= {handleBlur('email')}
-                value= {values.email}
-                keyboardType="email-address"
-            />
-                <MyTextInput 
-                label="Password"
-                icon="lock"
-                placeholder="* * * * * * * * *"
-                placeholderTextColor= {darklight}
-                onChangeText= {handleChange('password')}
-                onBlur= {handleBlur('password')}
-                value= {values.password}
-                secureTextEntry={hidePassword}
-                isPassword={true}
-                hidePassword={hidePassword}
-                setHidePassword={setHidePassword}
-            />
-            <MessageBox>...</MessageBox>
+          <Formik
+            initialValues={{email: '', password: ''}}
+            onSubmit={(values) =>{
+                console.log(values);
+            }}
+          >
+            {({handleChange,handleBlur,handleSubmit,values}) => (
+              <StyledFormArea>
+              <MyTextInput 
+                  label="Email Address"
+                  icon="mail"
+                  placeholder="emmanuel@gmail.com"
+                  placeholderTextColor= {darklight}
+                  onChangeText= {handleChange('email')}
+                  onBlur= {handleBlur('email')}
+                  value= {values.email}
+      
+              />
+                  <MyTextInput 
+                  label="Password"
+                  icon="lock"
+                  placeholder="* * * * * * * * *"
+                  placeholderTextColor= {darklight}
+                  onChangeText= {handleChange('password')}
+                  onBlur= {handleBlur('password')}
+                  value= {values.password}
+                  secureTextEntry={hidePassword}
+                  isPassword={true}
+                  hidePassword={hidePassword}
+                  setHidePassword={setHidePassword}
+              />
+              <MessageBox>...</MessageBox>
 
-              <StyledButton onPress={handleSubmit}>
-                <ButtonText>Login</ButtonText>
-              </StyledButton>
+                <StyledButton onPress={handleSubmit}>
+                  <ButtonText>Login</ButtonText>
+                </StyledButton>
 
-              {/* <Line>or</Line> */}
+                {/* <Line>or</Line> */}
 
-              {/* <StyledButton google={true} onPress={handleSubmit}>
-                <AntDesign name="google" color={primary} size={25}/>
-                <ButtonText google={true}>Continue with Google</ButtonText>
-              </StyledButton> */}
-              <ExtraView>
-                <ExtraText>Don't have an account yet? </ExtraText>
-                <TextLink onPress ={() => navigation.navigate ('Signup')} >
-                  <TextLinkContent>Sign Up</TextLinkContent>
-                </TextLink>
-              </ExtraView>
+                {/* <StyledButton google={true} onPress={handleSubmit}>
+                  <AntDesign name="google" color={primary} size={25}/>
+                  <ButtonText google={true}>Continue with Google</ButtonText>
+                </StyledButton> */}
+                <ExtraView>
+                  <ExtraText>Don't have an account yet? </ExtraText>
+                  <TextLink onPress ={() => navigation.navigate ('Signup')} >
+                    <TextLinkContent>Sign Up</TextLinkContent>
+                  </TextLink>
+                </ExtraView>
 
 
-          </StyledFormArea>)}
-        </Formik>
-      </InnerContainer>
-    </StyleContainer>
+            </StyledFormArea>)}
+          </Formik>
+        </InnerContainer>
+      </StyleContainer>
+  </KbAvoidWrapper>  
+  </ImageBackground>
   );
 };
 
@@ -116,4 +121,14 @@ const MyTextInput = ({label,icon,isPassword,hidePassword,setHidePassword,...prop
       </View>
     )
 }
+const styles = StyleSheet.create({
+  background: {
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject, // Creates a full-screen overlay
+
+  }});
 export default Login;

@@ -19,6 +19,8 @@ import {
   ExtraView,
   TextLink,
   TextLinkContent,
+  Spacer,
+  SignupSpace,
 } from '../components/styles';
 import { Image } from 'react-native';
 import { Formik } from 'formik';
@@ -27,6 +29,7 @@ import Octicons from 'react-native-vector-icons/Octicons';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import KbAvoidWrapper from '../components/KbAvoidWrapper';
 
 
 const {brand,darklight,primary} = Colors;
@@ -36,10 +39,11 @@ const SignUp = ({navigation}) => {
     const [show, setShow] = useState(false);
 
   return (
+    <KbAvoidWrapper>
     <StyleContainer>
       <InnerContainer>
-        <PageTitle>Eman nga pala ms</PageTitle>
-        <SubTitle>pwede pa kiss?</SubTitle>
+        <PageTitle>Create an acount</PageTitle>
+        <SubTitle></SubTitle>
 
         <Formik
           initialValues={{fullName: '',email: '', dateOfBirth: '', password: '', confirmPassword: ''}}
@@ -58,7 +62,7 @@ const SignUp = ({navigation}) => {
                 onBlur= {handleBlur('fullName')}
                 value= {values.fullName}
             />
-                        <MyTextInput 
+             <MyTextInput 
                 label="Email Address"
                 icon="mail"
                 placeholder="emmanuel@gmail.com"
@@ -114,6 +118,7 @@ const SignUp = ({navigation}) => {
         </Formik>
       </InnerContainer>
     </StyleContainer>
+   </KbAvoidWrapper>
   );
 };
 
@@ -131,6 +136,7 @@ const MyTextInput = ({label,icon,isPassword,hidePassword,setHidePassword,isDate,
               <Octicons name={hidePassword ? 'eye-closed' : 'eye'}size={30} color={darklight}/>
           </RightIcon>
         )}
+       <SignupSpace/>
       </View>
     )
 }

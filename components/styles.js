@@ -11,6 +11,7 @@ export const Colors = {
   brand: "#0d66f1",
   green: "#10B981",
   red: "#EF4444",
+  see:'rgba(0,0,0,0)'
 };
 
 const { primary,secondary,tertiary,darklight,brand,green,red } = Colors;
@@ -19,7 +20,7 @@ export const StyleContainer = styled(View)`
   flex: 1;
   padding: 25px;
   padding-top: ${StatusBarHeight + 10}px;
-  background-color: ${primary};
+  background-color: 'rgba(0,0,0,0)';
 `;
 
 export const InnerContainer = styled(View)`
@@ -38,7 +39,14 @@ export const PageTitle = styled(Text)`
   text-align: center;
   font-weight: bold;
   color: ${brand};
-  padding: 10px;
+  padding-top: 5px;
+`;
+export const SubPageTitle = styled(Text)`
+    font-size: 25px;
+  text-align: center;
+  font-weight: bold;
+  color: ${brand};
+  padding-bottom: 5px;
 `;
 export const SubTitle = styled(Text)`
     font-size: 18px;
@@ -49,7 +57,7 @@ export const SubTitle = styled(Text)`
 `;
 
 export const StyledFormArea = styled(View)`
-    width: 90%;
+    width: 95%;
 `;
 
 export const StyledTextInput = styled(TextInput)`
@@ -58,7 +66,7 @@ export const StyledTextInput = styled(TextInput)`
   padding: 15px;
   padding-left: 55px;
   padding-right: 55px;
-  border-radius: 5px;
+  border-radius: 30px;
   font-size: 16px;
   height: 60px;
   margin-vertical: 3px;
@@ -70,6 +78,7 @@ export const StyledInputLabel = styled(Text)`
   color: ${tertiary};
   font-size: 13px;
   text-align: left;
+  margin-left:10px;
 `;
 
 export const LeftIcon = styled(View)`
@@ -146,5 +155,13 @@ export const TextLinkContent = styled(Text)`
 `;
 
 export const Spacer = styled(View)`
-      padding :50px;
+      padding: 50px;
+`;
+export const SignupSpace = styled(View)`
+      padding: 15px;
+`;
+export const  background= styled(Image)`
+  flex: 1;
+  justifyContent: "center"; 
+  alignItems: "center";
 `;
