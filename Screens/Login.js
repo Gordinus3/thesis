@@ -59,8 +59,8 @@ const Login = ({navigation}) => {
       <StyleContainer>
         <InnerContainer>
           <Spacer></Spacer>
-          <Image style = {{width:300,height:200}} resizeMode="contain" source = {require('./../images/AppLogo2.png')}/>
-          <PageTitle>Plasdetect</PageTitle>
+          <Image style = {{width:300,height:200}} resizeMode="contain" source = {require('./../images/Logo.png')}/>
+          <PageTitle>MicroVision</PageTitle>
           <SubPageTitle></SubPageTitle>
           <SubTitle>Account Login</SubTitle>
 
