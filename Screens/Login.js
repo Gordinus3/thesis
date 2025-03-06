@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React, { useState } from 'react';
 import {
   StyleContainer,
   InnerContainer,
@@ -21,134 +21,151 @@ import {
   SubPageTitle,
 } from './../components/styles';
 
-import { Image, ImageBackground,StyleSheet } from 'react-native';
+import { Image, ImageBackground, StyleSheet } from 'react-native';
 import { Formik } from 'formik';
 import { View } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
 import KbAvoidWrapper from '../components/KbAvoidWrapper';
-import { FIREBASE_AUTH } from '../Firebaseconfig';
+import { FIREBASE_AUTH, FIREBASE_DB } from '../Firebaseconfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 
-const {brand,darklight,primary} = Colors;
+const { brand, darklight, primary } = Colors;
 
-const Login = ({navigation}) => {
-    const [hidePassword, setHidePassword] = useState(true);
-    const [errorMessage, setErrorMessage] = useState('')
-    const auth = FIREBASE_AUTH;
-   
-    const handleLogin = async (values) => {
-      try {
-        setErrorMessage(''); // Clear any previous error messages
-        const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-        const user = userCredential.user;
-        if (!user.emailVerified) {
-          setErrorMessage('Please verify your email before logging in.');
-        } else {
-          navigation.navigate('Home');
-        }
-      } catch (error) {
-        console.error('Login error:', error.message);
-        setErrorMessage('Invalid email or password. Please try again.');
+const Login = ({ navigation }) => {
+  const [hidePassword, setHidePassword] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('')
+  const auth = FIREBASE_AUTH;
+
+  const handleLogin = async (values) => {
+    try {
+      setErrorMessage(""); // Clear any previous error message
+
+      // Sign in the user using their email and password
+      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      if (user.email === "microvision2025@gmail.com") {
+        setErrorMessage("Invalid user");
+        return;
       }
-    };
+      // Ensure email is verified
+      if (!user.emailVerified) {
+        setErrorMessage("Please verify your email before logging in.");
+      } else {
+        console.log(user)
+        navigation.navigate("Home");
+
+      }
+    } catch (error) {
+      console.error("Login error:", error.message);
+      setErrorMessage("Invalid username/email or password. Please try again.");
+    }
+  };
 
   return (
-    <ImageBackground source={require("./../images/bg.png")} style={styles.background}  resizeMode="cover">
-    <KbAvoidWrapper>
-      <StyleContainer>
-        <InnerContainer>
-          <Spacer></Spacer>
-          <Image style = {{width:300,height:200}} resizeMode="contain" source = {require('./../images/AppLogo2.png')}/>
-          <PageTitle>Plasdetect</PageTitle>
-          <SubPageTitle></SubPageTitle>
-          <SubTitle>Account Login</SubTitle>
+    <ImageBackground source={require("./../images/bg.png")} style={styles.background} resizeMode="cover">
+      <KbAvoidWrapper>
+        <StyleContainer showsHorizontalScrollIndicator={false}>
+          <InnerContainer>
+            <Spacer></Spacer>
+            <Image style={{ width: 300, height: 200 }} resizeMode="contain" source={require('./../images/AppLogo2.png')} />
+            <PageTitle>MicroVision</PageTitle>
+            <SubPageTitle></SubPageTitle>
+            <SubTitle>Account Login</SubTitle>
 
-          <Formik
-            initialValues={{email: '', password: ''}}
-            onSubmit={handleLogin}
-          >
-            {({handleChange,handleBlur,handleSubmit,values}) => (
-              <StyledFormArea>
-              <MyTextInput 
-                  label="Email Address"
-                  icon="mail"
-                  placeholder="emmanuel@gmail.com"
-                  placeholderTextColor= {darklight}
-                  onChangeText= {handleChange('email')}
-                  onBlur= {handleBlur('email')}
-                  value= {values.email}
-      
-              />
-                  <MyTextInput 
-                  label="Password"
-                  icon="lock"
-                  placeholder="* * * * * * * * *"
-                  placeholderTextColor= {darklight}
-                  onChangeText= {handleChange('password')}
-                  onBlur= {handleBlur('password')}
-                  value= {values.password}
-                  secureTextEntry={hidePassword}
-                  isPassword={true}
-                  hidePassword={hidePassword}
-                  setHidePassword={setHidePassword}
-              />
-   
-               {errorMessage ? <MessageBox>{errorMessage}</MessageBox> : null}
+            <Formik
+              initialValues={{ email: '', password: '' }}
+              onSubmit={handleLogin}
+            >
+              {({ handleChange, handleBlur, handleSubmit, values }) => (
+                <StyledFormArea>
+                  <MyTextInput
+                    label="Email Address"
+                    icon="mail"
+                    placeholder="emmanuel@gmail.com"
+                    placeholderTextColor={darklight}
+                    onChangeText={handleChange('email')}
+                    onBlur={handleBlur('email')}
+                    value={values.email}
+
+                  />
+                  <MyTextInput
+                    label="Password"
+                    icon="lock"
+                    placeholder="* * * * * * * * *"
+                    placeholderTextColor={darklight}
+                    onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
+                    value={values.password}
+                    secureTextEntry={hidePassword}
+                    isPassword={true}
+                    hidePassword={hidePassword}
+                    setHidePassword={setHidePassword}
+                  />
+
+                  <ExtraView>
+                    <TextLink onPress={() => navigation.navigate('ForgotPass')} >
+                      <TextLinkContent>Forgot your password?</TextLinkContent>
+                    </TextLink>
+                  </ExtraView>
+
+                  {errorMessage ? <MessageBox>{errorMessage}</MessageBox> : null}
 
 
-                <StyledButton onPress={handleSubmit}>
-                  <ButtonText>Login</ButtonText>
-                </StyledButton>
+                  <StyledButton onPress={handleSubmit}>
+                    <ButtonText>Login</ButtonText>
+                  </StyledButton>
 
-                {/* <Line>or</Line> */}
+                  {/* <Line>or</Line> */}
 
-                {/* <StyledButton google={true} onPress={handleSubmit}>
+                  {/* <StyledButton google={true} onPress={handleSubmit}>
                   <AntDesign name="google" color={primary} size={25}/>
                   <ButtonText google={true}>Continue with Google</ButtonText>
                 </StyledButton> */}
-                
-                <ExtraView>
-                  <ExtraText>Don't have an account yet? </ExtraText>
-                  <TextLink onPress ={() => navigation.navigate ('Signup')} >
-                    <TextLinkContent>Sign Up</TextLinkContent>
-                  </TextLink>
-                </ExtraView>
+
+                  <ExtraView>
+                    <ExtraText>Don't have an account yet? </ExtraText>
+                    <TextLink onPress={() => navigation.navigate('Signup')} >
+                      <TextLinkContent>Sign Up</TextLinkContent>
+                    </TextLink>
+                  </ExtraView>
 
 
-            </StyledFormArea>)}
-          </Formik>
-        </InnerContainer>
-      </StyleContainer>
-  </KbAvoidWrapper>  
-  </ImageBackground>
+                </StyledFormArea>)}
+            </Formik>
+          </InnerContainer>
+        </StyleContainer>
+      </KbAvoidWrapper>
+    </ImageBackground>
   );
 };
 
-const MyTextInput = ({label,icon,isPassword,hidePassword,setHidePassword,...props}) =>{
-    return(
-      <View>
-        <LeftIcon>
-          <Octicons name ={icon} size={30} color={brand} />
-        </LeftIcon>
-        <StyledInputLabel>{label}</StyledInputLabel>
-        <StyledTextInput {...props} />  
-        {isPassword && (
-          <RightIcon onPress={() => setHidePassword(!hidePassword)}>
-              <Octicons name={hidePassword ? 'eye-closed' : 'eye'}size={30} color={darklight}/>
-          </RightIcon>
-        )}
-      </View>
-    )
+const MyTextInput = ({ label, icon, isPassword, hidePassword, setHidePassword, ...props }) => {
+  return (
+    <View>
+      <LeftIcon>
+        <Octicons name={icon} size={30} color={brand} />
+      </LeftIcon>
+      <StyledInputLabel>{label}</StyledInputLabel>
+      <StyledTextInput {...props} />
+      {isPassword && (
+        <RightIcon onPress={() => setHidePassword(!hidePassword)}>
+          <Octicons name={hidePassword ? 'eye-closed' : 'eye'} size={30} color={darklight} />
+        </RightIcon>
+      )}
+    </View>
+  )
 }
 const styles = StyleSheet.create({
   background: {
-    flex: 1, 
-    justifyContent: "center", 
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
   },
   overlay: {
-    ...StyleSheet.absoluteFillObject, 
+    ...StyleSheet.absoluteFillObject,
 
-  }});
+  }
+});
 export default Login;

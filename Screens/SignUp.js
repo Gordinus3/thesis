@@ -23,11 +23,36 @@ import { Formik } from 'formik';
 import { View, Text } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
 import KbAvoidWrapper from '../components/KbAvoidWrapper';
-import { FIREBASE_AUTH } from '../Firebaseconfig';
+import { FIREBASE_AUTH, FIREBASE_DB } from '../Firebaseconfig';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import * as Yup from 'yup';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
+
 
 const { brand, darklight, primary } = Colors;
+
+const handleSignup = async (values) => {
+  try {
+    setErrorMessage(""); // Clear previous errors
+    // If username is unique, proceed with account creation
+    const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, values.email, values.password);
+    const user = userCredential.user;
+
+    // Save user details (username, email) to Firestore
+    await addDoc(usersRef, {
+      uid: user.uid,
+      username: values.fullName,
+      email: values.email,
+    });
+
+    // Navigate to Home or Verification Page
+    navigation.navigate("VerifyEmail");
+
+  } catch (error) {
+    console.error("Signup error:", error.message);
+    setErrorMessage("Signup failed. Please try again.");
+  }
+};
 
 const SignUp = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);
@@ -67,6 +92,20 @@ const SignUp = ({ navigation }) => {
                 );
                 
                 const user = userCredential.user;
+
+                   // Save user data in Firestore
+                   try {
+                    await setDoc(doc(FIREBASE_DB, "users", user.uid), {
+                      fullName: values.fullName,
+                      email: values.email,
+                    });
+                    
+                  } catch (dbError) {
+                    console.error("Error saving user to Firestore:", dbError.message);
+                    alert("Failed to save user data. Please try again.");
+                  }
+                  
+
             
                 // Send email verification
                 await sendEmailVerification(user);
@@ -88,7 +127,7 @@ const SignUp = ({ navigation }) => {
             
           >
             {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-              <StyledFormArea>
+              <StyledFormArea>                
                 <MyTextInput
                   label="Full Name"
                   icon="person"

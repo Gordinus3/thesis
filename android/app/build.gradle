@@ -79,7 +79,7 @@ android {
 
     namespace "com.app"
     defaultConfig {
-        applicationId "com.plasdetect.app"
+        applicationId "com.microvision.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
