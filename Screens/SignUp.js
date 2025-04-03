@@ -27,37 +27,13 @@ import { FIREBASE_AUTH, FIREBASE_DB } from '../Firebaseconfig';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import * as Yup from 'yup';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
-
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
 
 const { brand, darklight, primary } = Colors;
-
-const handleSignup = async (values) => {
-  try {
-    setErrorMessage(""); // Clear previous errors
-    // If username is unique, proceed with account creation
-    const userCredential = await createUserWithEmailAndPassword(FIREBASE_AUTH, values.email, values.password);
-    const user = userCredential.user;
-
-    // Save user details (username, email) to Firestore
-    await addDoc(usersRef, {
-      uid: user.uid,
-      username: values.fullName,
-      email: values.email,
-    });
-
-    // Navigate to Home or Verification Page
-    navigation.navigate("VerifyEmail");
-
-  } catch (error) {
-    console.error("Signup error:", error.message);
-    setErrorMessage("Signup failed. Please try again.");
-  }
-};
 
 const SignUp = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);
 
-  
   const validationSchema = Yup.object().shape({
     fullName: Yup.string()
       .min(3, 'Full name must be at least 3 characters')
@@ -81,7 +57,7 @@ const SignUp = ({ navigation }) => {
 
           <Formik
             initialValues={{ fullName: '', email: '', password: '', confirmPassword: '' }}
-            validationSchema={validationSchema} 
+            validationSchema={validationSchema}
             onSubmit={async (values, { setSubmitting }) => {
               setSubmitting(true);
               try {
@@ -90,41 +66,53 @@ const SignUp = ({ navigation }) => {
                   values.email,
                   values.password
                 );
-                
+
                 const user = userCredential.user;
+                const userId = user.uid;
 
-                   // Save user data in Firestore
-                   try {
-                    await setDoc(doc(FIREBASE_DB, "users", user.uid), {
-                      fullName: values.fullName,
-                      email: values.email,
-                    });
-                    
-                  } catch (dbError) {
-                    console.error("Error saving user to Firestore:", dbError.message);
-                    alert("Failed to save user data. Please try again.");
-                  }
-                  
+                // Save user data in Firestore
+                try {
+                  await setDoc(doc(FIREBASE_DB, "users", userId), {
+                    fullName: values.fullName,
+                    email: values.email,
+                  });
+                  console.log("User saved in Firestore successfully.");
+                } catch (dbError) {
+                  console.error("Error saving user to Firestore:", dbError.message);
+                  alert("Failed to save user data. Please try again.");
+                }
 
-            
+                // Initialize Firebase Storage
+                const storage = getStorage();
+                
+                // Create a reference to the user's folder in Storage
+                const folderRef = ref(storage, `${userId}/placeholder.txt`);
+                
+                // Create a placeholder file to ensure the folder exists
+                const placeholderFile = new Blob(["This is a placeholder file."], { type: "text/plain" });
+                
+                try {
+                  await uploadBytes(folderRef, placeholderFile);
+                  console.log(`Folder created for user ${userId} in Firebase Storage.`);
+                } catch (storageError) {
+                  console.error("Error creating folder in Firebase Storage:", storageError.message);
+                  alert("Failed to create user folder. Please try again.");
+                }
+
                 // Send email verification
                 await sendEmailVerification(user);
                 console.log("Verification email sent!");
-            
-                // Optionally, show a message to the user
                 alert("A verification email has been sent. Please check your inbox and verify your email before logging in.");
-            
+
                 // Navigate to the login screen after signing up
                 navigation.navigate('Login');
-            
+
               } catch (error) {
                 console.error("Signup error:", error.message);
                 alert(error.message);
               }
               setSubmitting(false);
             }}
-            
-            
           >
             {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
               <StyledFormArea>                

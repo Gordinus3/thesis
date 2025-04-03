@@ -10,6 +10,7 @@ import ScanScreen from './Screens/ScanScreen';
 import Profile from './Screens/UpdatePass'
 import ProfileScreen from './Screens/UpdatePass';
 import UpdatePass from './Screens/UpdatePass';
+import ResultScreen from './Screens/ResultScreen';
 
 const Stack = createStackNavigator(); 
 
@@ -23,6 +24,7 @@ export default function App() {
         <Stack.Screen name="ForgotPass" component={ForgotPass} />
         <Stack.Screen name="ScanScreen" component={ScanScreen}/>
         <Stack.Screen name="UpdatePass" component={UpdatePass}/>
+        <Stack.Screen name="ResultScreen" component={ResultScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

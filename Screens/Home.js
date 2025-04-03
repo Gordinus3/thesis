@@ -2,18 +2,19 @@ import React, { useEffect, useState, useRef } from "react";
 import {
   HomeContainer,
   TestHomecontainer,
-  DetailsContainer,
-  LedContainer,
   HomeText,
   StatusText,
   StatusLink,
 } from "../components/styles";
 import { signOut, getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { View, Text, TouchableOpacity, Modal, Animated, TouchableWithoutFeedback } from "react-native";
+import { View, Text, TouchableOpacity, Modal, Animated, TouchableWithoutFeedback, Image } from "react-native";
 import Octicons from "react-native-vector-icons/Octicons";
 import { CommonActions } from '@react-navigation/native';
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { storage } from "../Firebaseconfig";
 
+// const storage = getStorage();
 const Home = ({ navigation }) => {
   const auth = getAuth();
   const db = getFirestore();
@@ -55,6 +56,7 @@ const Home = ({ navigation }) => {
 
   // Fetch user data
   const [userData, setUserData] = useState(null);
+  const [latestImageUrl, setLatestImageUrl] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -63,7 +65,23 @@ const Home = ({ navigation }) => {
         const userSnapshot = await getDoc(userDocRef);
 
         if (userSnapshot.exists()) {
-          setUserData(userSnapshot.data()); // Store user details in state
+          const userData = userSnapshot.data();
+          setUserData(userData);
+
+          // Fetch latest image URL from Firebase Storage
+          const imageCount = userData.imageCount || 0;
+          if (imageCount > 0) {
+            const latestImageIndex = imageCount - 1;
+
+            const imageRef = ref(storage, `${user.uid}/image${latestImageIndex}.png`);
+
+            try {
+              const latestImageUrl = await getDownloadURL(imageRef);
+              setLatestImageUrl(latestImageUrl);
+            } catch (error) {
+              console.error("Error fetching latest image URL:", error.message);
+            }
+          }
         }
       }
     });
@@ -106,7 +124,7 @@ const Home = ({ navigation }) => {
               >
                 <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 20 }}>Profile Menu</Text>
                 <StatusText>{userData?.fullName || "User"}</StatusText>
-                <StatusText>{userData?.email || "User"}</StatusText>
+                <StatusText>{userData?.email || "Email"}</StatusText>
 
                 {/* 🔹 Reset Password Button */}
                 <TouchableOpacity onPress={() => navigation.navigate('UpdatePass')} style={{ marginBottom: 10 }}>
@@ -137,9 +155,29 @@ const Home = ({ navigation }) => {
         </StatusLink>
       </TestHomecontainer>
 
-        //former details container, will contain test results, images, etc.
-      <TestHomecontainer style={{ flex: 1 }} />
-      //Led container, for controlling led power/intensity
+      {/* 🔹 Latest Image Display */}
+      <TestHomecontainer style={{ flex: 1 }}>
+        <TouchableOpacity onPress={() => navigation.navigate('ResultScreen')}>
+          <Text style={{ left: 10, fontWeight: "bold", fontSize: 20 }}>See more...</Text>
+        </TouchableOpacity>
+
+        {latestImageUrl && latestImageUrl !== '' ? (
+          <View style={{alignItems:"center",margin:5,color:"black"}}>
+            <Image
+              source={{ uri: latestImageUrl }}
+              style={{ width: 350, height: 200, marginBottom: 10,marginTop:15}}
+            />
+          </View>
+
+
+        ) : (
+          <View>
+            <Text style={{}}>No test results available</Text>
+          </View>
+
+        )}
+      </TestHomecontainer>
+      {/* //Led container, for controlling led power/intensity */}
       <TestHomecontainer style={{ height: 100 }} />
     </HomeContainer>
   );
