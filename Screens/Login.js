@@ -19,7 +19,7 @@ import {
   TextLinkContent,
   Spacer,
   SubPageTitle,
-} from './../components/styles';
+} from '../components/styles';
 
 import { Image, ImageBackground,StyleSheet } from 'react-native';
 import { Formik } from 'formik';

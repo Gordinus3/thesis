@@ -1,10 +1,10 @@
 import React from 'react';
-import Login from './Screens/Login';
+import Login from '../Screens/Login';
 import { StyleSheet, Text, View } from 'react-native';
-import SignUp from './Screens/SignUp';
+import SignUp from '../Screens/SignUp';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack'; 
-import Home from './Screens/Home';
+import Home from '../Screens/Home';
 
 const Stack = createStackNavigator(); 
 

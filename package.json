@@ -7,23 +7,29 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "web": "react-scripts start",
+    "build-web": "react-scripts build"
   },
   "dependencies": {
     "@react-native-community/datetimepicker": "^8.2.0",
     "@react-native-firebase/app": "^21.7.1",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/stack": "^7.1.1",
+    "ajv": "^8.17.1",
     "firebase": "^11.2.0",
     "formik": "^2.4.6",
     "or": "^0.2.0",
-    "react": "18.3.1",
+    "react": "^18.3.1",
+    "react-dom": "^19.0.0",
     "react-native": "0.77.0",
     "react-native-gesture-handler": "^2.22.1",
     "react-native-reanimated": "^3.16.7",
     "react-native-safe-area-context": "^5.1.0",
     "react-native-screens": "^4.5.0",
     "react-native-vector-icons": "^10.2.0",
+    "react-native-web": "^0.19.13",
+    "react-scripts": "^5.0.1",
     "styled-components": "^6.1.14",
     "yup": "^1.6.1"
   },
@@ -49,5 +55,17 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

@@ -17,13 +17,13 @@ import {
   TextLinkContent,
   SignupSpace,
   MessageBox,
-} from '../components/styles';
+} from '../../components/styles';
 
 import { Formik } from 'formik';
 import { View, Text } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
-import KbAvoidWrapper from '../components/KbAvoidWrapper';
-import { FIREBASE_AUTH } from '../Firebaseconfig';
+import KbAvoidWrapper from '../../components/KbAvoidWrapper';
+import { FIREBASE_AUTH } from '../../Firebaseconfig';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import * as Yup from 'yup';
 
@@ -51,7 +51,7 @@ const SignUp = ({ navigation }) => {
   return (
     <KbAvoidWrapper>
       <StyleContainer>
-        <InnerContainer>
+        <InnerContainer> 
           <PageTitle>Create an account</PageTitle>
 
           <Formik
