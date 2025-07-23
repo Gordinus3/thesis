@@ -11,16 +11,17 @@ export const Colors = {
   brand: "#0d66f1",
   green: "#10B981",
   red: "#EF4444",
-  see:'rgba(0,0,0,0)'
+  see:'rgba(0,0,0,0)',
+  detailcolor: '#E7EDFF',
 };
 
-const { primary,secondary,tertiary,darklight,brand,green,red } = Colors;
+const { primary,secondary,tertiary,darklight,brand,green,red,detailcolor } = Colors;
 
 export const StyleContainer = styled(View)`
   flex: 1;
   padding: 25px;
   padding-top: ${StatusBarHeight + 10}px;
-  background-color: 'rgba(0,0,0,0)';
+  background-color: rgba(0,0,0,0);
 `;
 
 export const InnerContainer = styled(View)`
@@ -165,4 +166,78 @@ export const  background= styled(Image)`
   flex: 1;
   justifyContent: "center"; 
   alignItems: "center";
+`;
+export const ScanContainer= styled(View)`
+  width: 100%;
+  height: 90px;
+  align-items: left;
+  background-color: ${detailcolor};
+  border-width :1px;
+  border-color:${brand};  
+  border-radius : 10px;
+`;
+export const DetailsContainer= styled(View)`
+  width: 100%;
+  flex:1;
+  align-items: center;
+  background-color: ${detailcolor};
+  border-color: ${brand};
+  border-radius: 10px;
+  border-width :1px;
+ 
+`;
+export const LedContainer= styled(View)`
+  width: 100%;
+  height: 100px;
+  align-items: center;
+  background-color: ${detailcolor} ;
+  border-color: ${brand};
+  border-radius: 10px;
+  border-width :1px;
+ 
+`;
+export const LogoutButton= styled(TouchableOpacity)`
+  padding: 5px;
+  background-color: ${brand};
+  justify-content: center;
+  border-radius: 5px;
+  margin-vertical: 15px;
+  height: 30x;
+  align-items: center;
+  width: 30%;
+`;
+export const HomeText = styled(Text)`
+  margin-top:5px;
+  left:15px;
+  font-size: 15px;
+  color: black;
+  font-weight:bold;
+`;
+export const StatusText = styled(Text)`
+  font-size: 15px;
+  color: ${brand};
+`;
+export const StatusLink = styled(TouchableOpacity)`
+     justify-content: center;
+      left: 15px;
+      margin: 5px;
+`;
+export const HomeContainer = styled(View)`
+      flex:1;
+      align-items: start;
+      gap: 8;
+      padding:15px; 
+`;
+export const TextUserWelcom = styled(Text)`
+      font-size: 15px;
+      color: ${primary};
+      font-weight:bold;
+`;
+
+export const TestHomecontainer = styled(View)`
+  width: 100%;
+  background-color: ${detailcolor};
+  border-color: ${brand};
+  border-radius: 10px;
+  border-width :1px;
 `;

@@ -79,7 +79,7 @@ android {
 
     namespace "com.app"
     defaultConfig {
-        applicationId "com.plasdetect.app"
+        applicationId "com.microvision.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -108,6 +108,7 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-zeroconf')
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
     implementation("com.google.firebase:firebase-analytics")
     // The version of react-native is set by the React Native Gradle Plugin

@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "1060940228041",
-    "project_id": "plasdetect-web",
-    "storage_bucket": "plasdetect-web.firebasestorage.app"
+    "project_number": "72145022613",
+    "project_id": "microvision-9bb94",
+    "storage_bucket": "microvision-9bb94.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1060940228041:android:60f1074606f1f71c167418",
+        "mobilesdk_app_id": "1:72145022613:android:75801ae8b0978de6e3f59c",
         "android_client_info": {
-          "package_name": "com.plasdetect.app"
+          "package_name": "com.microvision.app"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAn35JXoDbIFzlaknNivLC2Lxj8D59PbYg"
+          "current_key": "AIzaSyDIt2IHCWoEe7la5jS__6fAVOf-XiGpYhI"
         }
       ],
       "services": {
