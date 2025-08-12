@@ -5,6 +5,7 @@ import {
   HomeText,
   StatusText,
   StatusLink,
+  SectionHeader,
 } from "../components/styles";
 import { signOut, getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
@@ -149,10 +150,12 @@ const Home = ({ navigation }) => {
 
       {/* 🔹 Scanning Section */}
       <TestHomecontainer style={{ height: 80 }}>
-        <HomeText>Scanning in Progress</HomeText>
-        <StatusLink onPress={() => navigation.navigate("ScanScreen")}>
+        <SectionHeader>
+          <HomeText style={{ left: 10, fontWeight: "bold", fontSize: 20 }}>Scanning in Progress</HomeText>
+        </SectionHeader>
+            <StatusLink onPress={() => navigation.navigate("ScanScreen")}>
           <StatusText>View Status</StatusText>
-        </StatusLink>
+             </StatusLink>
       </TestHomecontainer>
 
       {/* 🔹 Latest Image Display */}
@@ -172,13 +175,12 @@ const Home = ({ navigation }) => {
 
         ) : (
           <View>
-            <Text style={{}}>No test results available</Text>
+            <Text style={{}}>   No test results available</Text>
           </View>
 
         )}
       </TestHomecontainer>
       {/* //Led container, for controlling led power/intensity */}
-      <TestHomecontainer style={{ height: 100 }} />
     </HomeContainer>
   );
 };

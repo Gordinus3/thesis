@@ -15,7 +15,7 @@ export const Colors = {
   detailcolor: '#E7EDFF',
 };
 
-const { primary,secondary,tertiary,darklight,brand,green,red,detailcolor } = Colors;
+const { primary,secondary,tertiary,darklight,brand,green,red,detailcolor } = Colors; //vytxqr15
 
 export const StyleContainer = styled(View)`
   flex: 1;
@@ -225,6 +225,7 @@ export const StatusLink = styled(TouchableOpacity)`
 export const HomeContainer = styled(View)`
       flex:1;
       align-items: start;
+      background-color: ${detailcolor};
       gap: 8;
       padding:15px; 
 `;
@@ -236,8 +237,13 @@ export const TextUserWelcom = styled(Text)`
 
 export const TestHomecontainer = styled(View)`
   width: 100%;
-  background-color: ${detailcolor};
-  border-color: ${brand};
+  background-color: ${primary};
   border-radius: 10px;
-  border-width :1px;
+`;
+
+export const SectionHeader = styled(View)`
+  background-color: ${brand};
+  padding: 5px 5px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 `;
