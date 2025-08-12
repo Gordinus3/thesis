@@ -17,7 +17,7 @@ import {
 } from "react-native";
 import Octicons from "react-native-vector-icons/Octicons";
 import { CommonActions } from "@react-navigation/native";
-import { ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
+import { ref, listAll, getDownloadURL, getMetadata, getStorage } from "firebase/storage";
 import { storage } from "../Firebaseconfig";
 
 const Home = ({ navigation }) => {
@@ -25,6 +25,9 @@ const Home = ({ navigation }) => {
   const db = getFirestore();
   const [visible, setVisible] = useState(false);
   const translateX = useRef(new Animated.Value(-300)).current;
+
+  const [userData, setUserData] = useState(null);
+  const [latestImageUrl, setLatestImageUrl] = useState(null);
 
   const show = () => {
     setVisible(true);
@@ -57,52 +60,85 @@ const Home = ({ navigation }) => {
     }
   };
 
-  const [userData, setUserData] = useState(null);
-  const [latestImageUrl, setLatestImageUrl] = useState(null);
+  const fetchLatestImageFromStorage = async () => {
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+  
+      if (!user) {
+        console.log("No user logged in");
+        return null;
+      }
+  
+      const storage = getStorage();
+      const folderRef = ref(storage, `${user.uid}/detections`);
+  
+      const result = await listAll(folderRef);
+  
+      if (result.items.length === 0) {
+        console.log("No images found");
+        return null;
+      }
+  
+      let latestFile = null;
+      let latestTimestamp = 0;
+  
+      // Loop through each file and get metadata
+      for (const itemRef of result.items) {
+        const metadata = await getMetadata(itemRef);
+        const fileTime = new Date(metadata.timeCreated).getTime();
+  
+        if (fileTime > latestTimestamp) {
+          latestTimestamp = fileTime;
+          latestFile = itemRef;
+        }
+      }
+  
+      if (latestFile) {
+        const url = await getDownloadURL(latestFile);
+        console.log("Latest image URL:", url);
+        return url;
+      }
+  
+      return null;
+    } catch (error) {
+      console.error("Error fetching latest image:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userSnapshot = await getDoc(userDocRef);
-
-        if (userSnapshot.exists()) {
-          const data = userSnapshot.data();
-          setUserData(data);
-
-          try {
-            const folderRef = ref(storage, `${uid}/detections`);
-            const listResult = await listAll(folderRef);
-
-            if (listResult.items.length === 0) return;
-
-            const metadataList = await Promise.all(
-              listResult.items.map(async (itemRef) => {
-                const metadata = await getMetadata(itemRef);
-                return {
-                  ref: itemRef,
-                  updated: metadata.updated,
-                };
-              })
-            );
-
-            const latest = metadataList.reduce((a, b) =>
-              new Date(a.updated) > new Date(b.updated) ? a : b
-            );
-
-            const latestUrl = await getDownloadURL(latest.ref);
-            console.log("Fetched latest image URL:", latestUrl);
-            setLatestImageUrl(latestUrl);
-          } catch (error) {
-            console.error("Error fetching latest image:", error.message);
+        try {
+          // Fetch user document from Firestore
+          const userDocRef = doc(db, "users", user.uid);
+          const userSnapshot = await getDoc(userDocRef);
+  
+          if (userSnapshot.exists()) {
+            const userData = userSnapshot.data();
+            setUserData(userData); // You can display userData.name later
+  
+            // Load latest image
+            const url = await fetchLatestImageFromStorage();
+            if (url) {
+              setLatestImageUrl(url);
+            }
           }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
         }
+      } else {
+        setUserData(null);
+        setLatestImageUrl(null);
       }
     });
-
+  
     return () => unsubscribe();
   }, []);
-
+  
+  
+ 
   return (
     <HomeContainer>
       <View
@@ -169,9 +205,7 @@ const Home = ({ navigation }) => {
 
       {/* Latest Image Display */}
       <TestHomecontainer style={{ flex: 1 }}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("ResultScreen")}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("ResultScreen")}>
           <StatusText
             style={{
               left: 250,
@@ -180,7 +214,7 @@ const Home = ({ navigation }) => {
               marginTop: 5,
             }}
           >
-            View All ➜
+            View Alls ➜
           </StatusText>
         </TouchableOpacity>
 
