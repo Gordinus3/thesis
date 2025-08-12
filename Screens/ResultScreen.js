@@ -1,51 +1,61 @@
 import React, { useEffect, useState } from "react";
-import { HomeContainer, TestHomecontainer, HomeText, StatusText } from "../components/styles";
+import { View, Text, ScrollView, Image, TouchableOpacity, Linking } from "react-native";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { View, Text, ScrollView, Image } from "react-native";
-import { getStorage, ref, getDownloadURL, getMetadata } from "firebase/storage";
+import { ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { storage } from "../Firebaseconfig";
+import { HomeContainer, TestHomecontainer, HomeText } from "../components/styles";
 
-const ResultScreen = ({ navigation }) => {
-  const auth = getAuth();
-  const db = getFirestore();
-  const [userData, setUserData] = useState(null);
-  const [imageUrls, setImageUrls] = useState([]);
-  const [timestamps, setTimestamps] = useState([]);
+const ResultScreen = () => {
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userSnapshot = await getDoc(userDocRef);
+    const unsubscribe = onAuthStateChanged(getAuth(), async (user) => {
+      if (!user) return;
 
-        if (userSnapshot.exists()) {
-          const userData = userSnapshot.data();
-          setUserData(userData);
+      const uid = user.uid;
+      const db = getFirestore();
+      const folderRef = ref(storage, `${uid}/detections/`);
 
-          const imageCount = userData.imageCount || 0;
-          const fetchedImages = [];
-          const fetchedTimestamps = [];
+      try {
+        const result = await listAll(folderRef);
 
-          for (let i = 0; i < imageCount; i++) {
-            const imageRef = ref(storage, `${user.uid}/image${i}.png`);
+        const fetchedImages = await Promise.all(
+          result.items.map(async (itemRef) => {
+            const url = await getDownloadURL(itemRef);
+            const metadata = await getMetadata(itemRef);
 
-            try {
-              const imageUrl = await getDownloadURL(imageRef);
-              const metadata = await getMetadata(imageRef); // Get metadata
-              const timeCreated = metadata.timeCreated; // Get upload timestamp
+            const name = metadata.name; // e.g., "20250724_032067_image0.jpg"
 
-              fetchedImages.push(imageUrl);
-              fetchedTimestamps.push(timeCreated); // Store the timestamp
+            // Strip file extension and "_image0" suffix if it exists
+            const nameWithoutExt = name.split(".")[0]; // "20250724_032067_image0"
+            const timestampMatch = nameWithoutExt.match(/^(\d{8}_\d{6})/); // Extract "20250724_032067"
+            const timestamp = timestampMatch ? timestampMatch[1] : null;
 
-            } catch (error) {
-              console.error(`Error fetching image${i}.png:`, error.message);
+            let pdfUrl = null;
+
+            if (timestamp) {
+              const reportRef = doc(db, "users", uid, "reports", `report_${timestamp}`);
+              const reportSnap = await getDoc(reportRef);
+
+              if (reportSnap.exists()) {
+                const reportData = reportSnap.data();
+                pdfUrl = reportData?.pdf_url || null;
+              }
             }
-          }
 
-          setImageUrls(fetchedImages);
-          setTimestamps(fetchedTimestamps); // Save timestamps to state
-        }
+            return {
+              url,
+              name,
+              timeCreated: metadata.timeCreated,
+              pdfUrl,
+            };
+          })
+        );
+
+        setImages(fetchedImages);
+      } catch (error) {
+        console.error("Error fetching images or reports:", error.message);
       }
     });
 
@@ -58,17 +68,30 @@ const ResultScreen = ({ navigation }) => {
         <HomeText>All Test Results</HomeText>
       </TestHomecontainer>
 
-      {imageUrls.length > 0 ? (
+      {images.length > 0 ? (
         <ScrollView>
-          {imageUrls.map((url, index) => (
+          {images.map((img, index) => (
             <View key={index} style={{ marginBottom: 20, alignItems: "center" }}>
-              <Image source={{ uri: url }} style={{ width: 350, height: 200, marginBottom: 10 }} />
-              <Text style={{ fontWeight: "bold", fontSize: 16 }}>Test Result {index + 1}</Text>
-              
-              {/* Display timestamp */}
+              <Image
+                source={{ uri: img.url }}
+                style={{ width: 350, height: 200, marginBottom: 10 }}
+              />
+              <Text style={{ fontWeight: "bold", fontSize: 16 }}>{img.name}</Text>
               <Text style={{ fontSize: 12, color: "gray" }}>
-                Uploaded on: {new Date(timestamps[index]).toLocaleString()}
+                Uploaded on: {new Date(img.timeCreated).toLocaleString()}
               </Text>
+
+              {img.pdfUrl ? (
+                <TouchableOpacity onPress={() => Linking.openURL(img.pdfUrl)}>
+                  <Text style={{ color: "blue", textDecorationLine: "underline", marginTop: 5 }}>
+                    View PDF Report
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <Text style={{ fontSize: 12, color: "gray", marginTop: 5 }}>
+                  No PDF report found
+                </Text>
+              )}
             </View>
           ))}
         </ScrollView>
