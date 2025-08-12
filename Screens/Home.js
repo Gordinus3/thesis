@@ -5,6 +5,7 @@ import {
   StatusText,
   StatusLink,
   SectionHeader,
+  HomeText,
 } from "../components/styles";
 import { signOut, getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
@@ -169,17 +170,6 @@ const Home = ({ navigation }) => {
         </TouchableWithoutFeedback>
       </Modal>
 
-
-      {/* 🔹 Scanning Section */}
-      <TestHomecontainer style={{ height: 80 }}>
-        <SectionHeader>
-          <HomeText style={{ left: 10, fontWeight: "bold", fontSize: 20 }}>Scanning in Progress</HomeText>
-        </SectionHeader>
-            <StatusLink onPress={() => navigation.navigate("ScanScreen")}>
-          <StatusText>View Status</StatusText>
-             </StatusLink>
-      </TestHomecontainer>
-
       {/* 🔹 Latest Image Display */}
       <TestHomecontainer style={{ flex: 1 }}>
         <TouchableOpacity
@@ -187,10 +177,10 @@ const Home = ({ navigation }) => {
         >
           <StatusText
             style={{
-              left: 250,
+              left: 268,
               fontWeight: "bold",
               fontSize: 20,
-              marginTop: 5,
+              marginTop: 12,
             }}
           >
             View All ➜
