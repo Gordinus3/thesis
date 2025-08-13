@@ -69,11 +69,11 @@ const Home = ({ navigation }) => {
           setUserData(userData);
 
           // Fetch latest image URL from Firebase Storage
-          const imageCount = userData.imageCount || 0;
+          const imageCount = 1;
           if (imageCount > 0) {
             const latestImageIndex = imageCount - 1;
 
-            const imageRef = ref(storage, `${user.uid}/image${latestImageIndex}.png`);
+            const imageRef = ref(storage, `${user.uid}/detections/image${latestImageIndex}.jpg`);
 
             try {
               const latestImageUrl = await getDownloadURL(imageRef);
@@ -149,9 +149,12 @@ const Home = ({ navigation }) => {
 
       {/* 🔹 Scanning Section */}
       <TestHomecontainer style={{ height: 80 }}>
-        <HomeText>Scanning in Progress</HomeText>
+        <HomeText>MicroVision Status:</HomeText>
+        <StatusText style={{ left: 10, fontWeight: "bold", fontSize: 18 }}>
+            {userData?.device_status}
+        </StatusText>
         <StatusLink onPress={() => navigation.navigate("ScanScreen")}>
-          <StatusText>View Status</StatusText>
+          <StatusText>Details</StatusText>
         </StatusLink>
       </TestHomecontainer>
 

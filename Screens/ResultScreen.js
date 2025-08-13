@@ -5,6 +5,7 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { View, Text, ScrollView, Image } from "react-native";
 import { getStorage, ref, getDownloadURL, getMetadata } from "firebase/storage";
 import { storage } from "../Firebaseconfig";
+import { Link } from "@react-navigation/native";
 
 const ResultScreen = ({ navigation }) => {
   const auth = getAuth();
@@ -23,12 +24,12 @@ const ResultScreen = ({ navigation }) => {
           const userData = userSnapshot.data();
           setUserData(userData);
 
-          const imageCount = userData.imageCount || 0;
+          const imageCount = userData.imageCount||0;
           const fetchedImages = [];
           const fetchedTimestamps = [];
 
           for (let i = 0; i < imageCount; i++) {
-            const imageRef = ref(storage, `${user.uid}/image${i}.png`);
+            const imageRef = ref(storage, `${user.uid}/detections/image${i}.jpg`);
 
             try {
               const imageUrl = await getDownloadURL(imageRef);
@@ -64,7 +65,6 @@ const ResultScreen = ({ navigation }) => {
             <View key={index} style={{ marginBottom: 20, alignItems: "center" }}>
               <Image source={{ uri: url }} style={{ width: 350, height: 200, marginBottom: 10 }} />
               <Text style={{ fontWeight: "bold", fontSize: 16 }}>Test Result {index + 1}</Text>
-              
               {/* Display timestamp */}
               <Text style={{ fontSize: 12, color: "gray" }}>
                 Uploaded on: {new Date(timestamps[index]).toLocaleString()}
