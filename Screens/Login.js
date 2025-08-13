@@ -72,7 +72,7 @@ const Login = ({ navigation }) => {
             <Image style={{ width: 300, height: 200 }} resizeMode="contain" source={require('./../images/Logo.png')} />
             <PageTitle>MicroVision</PageTitle>
             <SubPageTitle></SubPageTitle>
-            <SubTitle>Account Login vytxqr15</SubTitle>
+            <SubTitle>Account Login</SubTitle>
 
             <Formik
               initialValues={{ email: '', password: '' }}

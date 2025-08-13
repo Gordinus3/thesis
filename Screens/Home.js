@@ -166,7 +166,7 @@ const Home = ({ navigation }) => {
         }}
       >
         <StatusText style={{ left: 10, fontWeight: "bold", fontSize: 20 }}>
-          Status: {userData?.device_status || "Disconnected"}
+          Device Status: {userData?.device_status || "Disconnected"}
         </StatusText>
       </View>
 
@@ -202,12 +202,8 @@ const Home = ({ navigation }) => {
                   <Text>Reset Password</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={signoutpress}>
-                  <Text>Logout</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={hide} style={{ marginTop: 20 }}>
-                  <Text style={{ color: "red" }}>Close</Text>
+                <TouchableOpacity onPress={signoutpress} style={{ marginTop: 20 }}>
+                  <Text style={{ color: "red" }}>Logout</Text>
                 </TouchableOpacity>
               </Animated.View>
             </TouchableWithoutFeedback>
