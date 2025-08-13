@@ -2,60 +2,70 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, Image, TouchableOpacity, Linking } from "react-native";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { storage } from "../Firebaseconfig";
 import { HomeContainer, TestHomecontainer, HomeText } from "../components/styles";
 
 const ResultScreen = () => {
-  const [images, setImages] = useState([]);
+  const [results, setResults] = useState([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getAuth(), async (user) => {
       if (!user) return;
 
       const uid = user.uid;
-      const db = getFirestore();
-      const folderRef = ref(storage, `${uid}/detections/`);
 
       try {
-        const result = await listAll(folderRef);
+        // ---------- Get PDFs from reports/ ----------
+        const reportsRef = ref(storage, `${uid}/reports/`);
+        const pdfPattern = /^\d{8}_session\d+\.pdf$/;
+        const pdfMap = {};
 
-        const fetchedImages = await Promise.all(
-          result.items.map(async (itemRef) => {
-            const url = await getDownloadURL(itemRef);
-            const metadata = await getMetadata(itemRef);
-
-            const name = metadata.name; // e.g., "20250724_032067_image0.jpg"
-
-            // Strip file extension and "_image0" suffix if it exists
-            const nameWithoutExt = name.split(".")[0]; // "20250724_032067_image0"
-            const timestampMatch = nameWithoutExt.match(/^(\d{8}_\d{6})/); // Extract "20250724_032067"
-            const timestamp = timestampMatch ? timestampMatch[1] : null;
-
-            let pdfUrl = null;
-
-            if (timestamp) {
-              const reportRef = doc(db, "users", uid, "reports", `report_${timestamp}`);
-              const reportSnap = await getDoc(reportRef);
-
-              if (reportSnap.exists()) {
-                const reportData = reportSnap.data();
-                pdfUrl = reportData?.pdf_url || null;
-              }
-            }
-
-            return {
-              url,
-              name,
-              timeCreated: metadata.timeCreated,
-              pdfUrl,
-            };
-          })
+        const reportsResult = await listAll(reportsRef);
+        await Promise.all(
+          reportsResult.items
+            .filter(itemRef => pdfPattern.test(itemRef.name))
+            .map(async (itemRef) => {
+              const pdfUrl = await getDownloadURL(itemRef);
+              const sessionKey = itemRef.name.split(".")[0]; // e.g., "20250813_session1"
+              pdfMap[sessionKey] = pdfUrl;
+            })
         );
 
-        setImages(fetchedImages);
+        // ---------- Get images from detections/ ----------
+        const detectionsRef = ref(storage, `${uid}/detections/`);
+        const imagePattern = /^\d{8}_session\d+_image\d+\.jpg$/;
+        const detectionsResult = await listAll(detectionsRef);
+
+        // Group images by sessionKey
+        const sessionImageMap = {};
+
+        await Promise.all(
+          detectionsResult.items
+            .filter(itemRef => imagePattern.test(itemRef.name))
+            .map(async (itemRef) => {
+              const url = await getDownloadURL(itemRef);
+              const metadata = await getMetadata(itemRef);
+              const timeCreated = new Date(metadata.timeCreated);
+              const sessionKey = itemRef.name.replace(/_image\d+\.jpg$/, "");
+
+              // Keep only the newest image per session
+              if (!sessionImageMap[sessionKey] || timeCreated > sessionImageMap[sessionKey].timeCreated) {
+                sessionImageMap[sessionKey] = {
+                  url,
+                  name: itemRef.name,
+                  timeCreated,
+                  pdfUrl: pdfMap[sessionKey] || null
+                };
+              }
+            })
+        );
+
+        // Convert to array & sort newest first
+        const finalResults = Object.values(sessionImageMap).sort((a, b) => b.timeCreated - a.timeCreated);
+
+        setResults(finalResults);
       } catch (error) {
-        console.error("Error fetching images or reports:", error.message);
+        console.error("Error fetching results:", error.message);
       }
     });
 
@@ -68,21 +78,21 @@ const ResultScreen = () => {
         <HomeText>All Test Results</HomeText>
       </TestHomecontainer>
 
-      {images.length > 0 ? (
+      {results.length > 0 ? (
         <ScrollView>
-          {images.map((img, index) => (
+          {results.map((item, index) => (
             <View key={index} style={{ marginBottom: 20, alignItems: "center" }}>
               <Image
-                source={{ uri: img.url }}
+                source={{ uri: item.url }}
                 style={{ width: 350, height: 200, marginBottom: 10 }}
               />
-              <Text style={{ fontWeight: "bold", fontSize: 16 }}>{img.name}</Text>
+              <Text style={{ fontWeight: "bold", fontSize: 16 }}>{item.name}</Text>
               <Text style={{ fontSize: 12, color: "gray" }}>
-                Uploaded on: {new Date(img.timeCreated).toLocaleString()}
+                Uploaded on: {item.timeCreated.toLocaleString()}
               </Text>
 
-              {img.pdfUrl ? (
-                <TouchableOpacity onPress={() => Linking.openURL(img.pdfUrl)}>
+              {item.pdfUrl ? (
+                <TouchableOpacity onPress={() => Linking.openURL(item.pdfUrl)}>
                   <Text style={{ color: "blue", textDecorationLine: "underline", marginTop: 5 }}>
                     View PDF Report
                   </Text>

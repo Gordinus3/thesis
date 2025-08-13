@@ -157,6 +157,18 @@ const Home = ({ navigation }) => {
           Welcome, {userData?.fullName || "User"}
         </StatusText>
       </View>
+      <View
+        style={{
+          height: 30,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 5,
+        }}
+      >
+        <StatusText style={{ left: 10, fontWeight: "bold", fontSize: 20 }}>
+          Status: {userData?.device_status || "Disconnected"}
+        </StatusText>
+      </View>
 
       {/* Modal */}
       <Modal visible={visible} transparent animationType="none">
@@ -214,7 +226,7 @@ const Home = ({ navigation }) => {
               marginTop: 5,
             }}
           >
-            View Alls ➜
+            View All ➜
           </StatusText>
         </TouchableOpacity>
 
