@@ -21,7 +21,9 @@ import {
   SubPageTitle,
 } from './../components/styles';
 
-import { Image, ImageBackground, StyleSheet } from 'react-native';
+
+import LinearGradient from 'react-native-linear-gradient';
+import { Image, ImageBackground, StyleSheet, StatusBar } from 'react-native';
 import { Formik } from 'formik';
 import { View } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
@@ -32,7 +34,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 
 const { brand, darklight, primary } = Colors;
 
-const Login = ({ navigation }) => {
+const Login2 = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);
   const [errorMessage, setErrorMessage] = useState('')
   const auth = FIREBASE_AUTH;
@@ -64,14 +66,17 @@ const Login = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground source={require("./../images/bg.png")} style={styles.background} resizeMode="cover">
+    <LinearGradient
+      colors={['#69509A', '#00B2FF']} // top → bottom
+      start={{ x: 0, y: 0 }}          // gradient start point
+      end={{ x: 1, y: 1 }}            // gradient end point
+      style={{flex: 1}}>
+      <StatusBar translucent backgroundColor="transparent" barStyle= "light-content"/>
       <KbAvoidWrapper>
         <StyleContainer showsHorizontalScrollIndicator={false}>
           <InnerContainer>
-            <Spacer></Spacer>
             <Image style={{ width: 300, height: 200 }} resizeMode="contain" source={require('./../images/Logo.png')} />
             <PageTitle>MicroVision</PageTitle>
-            <SubPageTitle></SubPageTitle>
             <SubTitle>Account Login</SubTitle>
 
             <Formik
@@ -137,7 +142,7 @@ const Login = ({ navigation }) => {
           </InnerContainer>
         </StyleContainer>
       </KbAvoidWrapper>
-    </ImageBackground>
+    </LinearGradient>
   );
 };
 
@@ -168,4 +173,4 @@ const styles = StyleSheet.create({
 
   }
 });
-export default Login;
+export default Login2;
