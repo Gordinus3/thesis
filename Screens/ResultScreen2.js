@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Image, TouchableOpacity, Linking } from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity, Linking, StatusBar} from "react-native";
+import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
 import { storage } from "../Firebaseconfig";
-import { HomeContainer, TestHomecontainer, HomeText } from "../components/styles";
+import { HomeContainer, TestHomecontainer, HomeText, background } from "../components/styles";
 
-const ResultScreen = () => {
+const ResultScreen2 = () => {
   const [results, setResults] = useState([]);
 
   useEffect(() => {
+    changeNavigationBarColor('transparent', true, true);
     const unsubscribe = onAuthStateChanged(getAuth(), async (user) => {
       if (!user) return;
 
@@ -73,43 +75,52 @@ const ResultScreen = () => {
   }, []);
 
   return (
-    <HomeContainer>
+    <HomeContainer style={{ backgroundColor: "#1E3D58", padding: 20 }}>
+        <StatusBar translucent backgroundColor="transparent" barStyle="light-content"/>
+        
       <TestHomecontainer>
-        <HomeText>All Test Results</HomeText>
+        <HomeText>Scan Results</HomeText>
       </TestHomecontainer>
 
       {results.length > 0 ? (
         <ScrollView>
           {results.map((item, index) => (
-            <View key={index} style={{ marginBottom: 20, alignItems: "center" }}>
+            <View key={index} style={{ marginBottom: 20, alignItems: "center", backgroundColor: "#E8EEF1", borderRadius: 10, padding: 20 }}>
               <Image
                 source={{ uri: item.url }}
-                style={{ width: 350, height: 200, marginBottom: 10 }}
+                style={{ width: "100%", height: 200, marginBottom: 10 }}
               />
               <Text style={{ fontWeight: "bold", fontSize: 16 }}>{item.name}</Text>
               <Text style={{ fontSize: 12, color: "gray" }}>
                 Uploaded on: {item.timeCreated.toLocaleString()}
               </Text>
-
               {item.pdfUrl ? (
-                <TouchableOpacity onPress={() => Linking.openURL(item.pdfUrl)}>
-                  <Text style={{ color: "blue", textDecorationLine: "underline", marginTop: 5 }}>
-                    View PDF Report
-                  </Text>
+                <TouchableOpacity onPress={() => Linking.openURL(item.pdfUrl)} style={{ marginTop: 10, backgroundColor: "#00B2FF", padding: 10, borderRadius: 10 }}>
+                    <Text style={{ color: "#E8EEF1", fontWeight: "bold" }}>
+                         View PDF Report
+                    </Text>
                 </TouchableOpacity>
               ) : (
-                <Text style={{ fontSize: 12, color: "gray", marginTop: 5 }}>
-                  No PDF report found
-                </Text>
-              )}
+                <View>
+                    <Image source={require("./../images/box.png")} style={{ width: 60, height: 60, marginRight: 15 }}></Image>
+                    <Text style={{ fontSize: 12, color: "gray", marginTop: 5 }}>
+                        No PDF report found
+                    </Text>
+                </View>
+                )}
             </View>
           ))}
         </ScrollView>
       ) : (
-        <Text style={{ padding: 20 }}>No test results available</Text>
+        <View style ={{ justifyContent: "center", alignItems: "center", marginTop: 200}}>
+            <Image source={require("./../images/box.png")} style={{ width: 200, height: 200, marginRight: 15}}></Image>
+                <Text style={{ fontSize: 15, fontWeight: "bold", color: "#E8EEF1", marginTop: 5 }}>
+                    No scan results available
+                </Text>
+        </View>
       )}
     </HomeContainer>
   );
 };
 
-export default ResultScreen;
+export default ResultScreen2;

@@ -217,8 +217,8 @@ export const LogoutButton= styled(TouchableOpacity)`
 export const HomeText = styled(Text)`
   margin-top:5px;
   left:15px;
-  font-size: 15px;
-  color: black;
+  font-size: 20px;
+  color: #fff;
   font-weight:bold;
 `;
 export const StatusText = styled(Text)`
@@ -235,7 +235,7 @@ export const HomeContainer = styled(View)`
       flex:1;
       align-items: start;
       gap: 8;
-      padding:15px; 
+      padding:20px; 
       padding-top: ${StatusBarHeight + 5}px;
 `;
 export const TextUserWelcom = styled(Text)`
@@ -245,11 +245,9 @@ export const TextUserWelcom = styled(Text)`
 `;
 
 export const TestHomecontainer = styled(View)`
+margin-top: 5px;
+margin-bottom: 10px;
   width: 100%;
-  background-color: ${detailcolor};
-  border-color: ${brand};
-  border-radius: 10px;
-  border-width :1px;
 `;
 
 export const DeviceStatusContainer = styled(View).attrs(() => ({

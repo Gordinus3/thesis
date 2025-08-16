@@ -213,7 +213,7 @@ const Home = ({ navigation }) => {
 
       {/* Latest Image Display */}
       <TestHomecontainer style={{ flex: 1 }}>
-        <TouchableOpacity onPress={() => navigation.navigate("ResultScreen")}>
+        <TouchableOpacity onPress={() => navigation.navigate("ResultScreen2")}>
           <StatusText
             style={{
               left: 250,

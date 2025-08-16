@@ -19,7 +19,9 @@ import {
 } from '../components/styles';
 
 import { Formik } from 'formik';
-import { View } from 'react-native';
+import { View, StatusBar } from 'react-native';
+import changeNavigationBarColor from 'react-native-navigation-bar-color';
+import LinearGradient from 'react-native-linear-gradient';
 import Octicons from 'react-native-vector-icons/Octicons';
 import KbAvoidWrapper from '../components/KbAvoidWrapper';
 import { FIREBASE_AUTH } from '../Firebaseconfig';
@@ -37,65 +39,72 @@ const ForgotPass = ({ navigation }) => {
   });
 
   return (
-    <KbAvoidWrapper>
-      <StyleContainer>
-        <InnerContainer>
-          <PageTitle>Reset Your Password</PageTitle>
-          <Spacer />
-          <Formik
-            initialValues={{ email: '' }}
-            validationSchema={validationSchema}
-            onSubmit={async (values, { setSubmitting, setErrors }) => {
-              setSubmitting(true);
-            
-              try {
-                await sendPasswordResetEmail(FIREBASE_AUTH, values.email);
-                alert("If this email is registered, a password reset link has been sent.");
-                navigation.navigate('Login');
-              } catch (error) {
-                console.error("Error sending password reset:", error.code, error.message);
-            
-                if (error.code === 'auth/user-not-found') {
-                  setErrors({ email: 'No account found with this email.' });
-                } else if (error.code === 'auth/invalid-email') {
-                  setErrors({ email: 'Invalid email format.' });
-                } else {
-                  setErrors({ email: 'Something went wrong. Try again later.' });
+    <LinearGradient
+          colors={['#69509A', '#00B2FF']} // top → bottom
+          start={{ x: 0, y: 0 }}          // gradient start point
+          end={{ x: 1, y: 1 }}            // gradient end point
+          style={{flex: 1}}>
+          <StatusBar translucent backgroundColor="transparent" barStyle= "light-content"/>
+      <KbAvoidWrapper>
+        <StyleContainer>
+          <InnerContainer>
+            <PageTitle>Reset Your Password</PageTitle>
+            <Spacer />
+            <Formik
+              initialValues={{ email: '' }}
+              validationSchema={validationSchema}
+              onSubmit={async (values, { setSubmitting, setErrors }) => {
+                setSubmitting(true);
+              
+                try {
+                  await sendPasswordResetEmail(FIREBASE_AUTH, values.email);
+                  alert("If this email is registered, a password reset link has been sent.");
+                  navigation.navigate('Login');
+                } catch (error) {
+                  console.error("Error sending password reset:", error.code, error.message);
+              
+                  if (error.code === 'auth/user-not-found') {
+                    setErrors({ email: 'No account found with this email.' });
+                  } else if (error.code === 'auth/invalid-email') {
+                    setErrors({ email: 'Invalid email format.' });
+                  } else {
+                    setErrors({ email: 'Something went wrong. Try again later.' });
+                  }
                 }
-              }
-            
-              setSubmitting(false);
-            }}
-          >
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-              <StyledFormArea>
-                <MyTextInput
-                  label="Email Address"
-                  icon="mail"
-                  placeholder="Enter your email"
-                  placeholderTextColor={darklight}
-                  onChangeText={handleChange('email')}
-                  onBlur={handleBlur('email')}
-                  value={values.email}
-                  keyboardType="email-address"
-                />
-                {errors.email && touched.email && <MessageBox>{errors.email}</MessageBox>}
+              
+                setSubmitting(false);
+              }}
+            >
+              {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                <StyledFormArea>
+                  <MyTextInput
+                    label="Email Address"
+                    icon="mail"
+                    placeholder="Enter your email"
+                    placeholderTextColor={darklight}
+                    onChangeText={handleChange('email')}
+                    onBlur={handleBlur('email')}
+                    value={values.email}
+                    keyboardType="email-address"
+                  />
+                  {errors.email && touched.email && <MessageBox>{errors.email}</MessageBox>}
 
-                <StyledButton onPress={handleSubmit}>
-                  <ButtonText>Reset Password</ButtonText>
-                </StyledButton>
+                  <StyledButton onPress={handleSubmit}>
+                    <ButtonText>Reset Password</ButtonText>
+                  </StyledButton>
 
-                <ExtraView>
-                  <TextLink onPress={() => navigation.navigate('Login')}>
-                    <TextLinkContent>Back to Login</TextLinkContent>
-                  </TextLink>
-                </ExtraView>
-              </StyledFormArea>
-            )}
-          </Formik>
-        </InnerContainer>
-      </StyleContainer>
-    </KbAvoidWrapper>
+                  <ExtraView>
+                    <TextLink onPress={() => navigation.navigate('Login2')}>
+                      <TextLinkContent>Back to Login</TextLinkContent>
+                    </TextLink>
+                  </ExtraView>
+                </StyledFormArea>
+              )}
+            </Formik>
+          </InnerContainer>
+        </StyleContainer>
+      </KbAvoidWrapper>
+    </LinearGradient>
   );
 };
 

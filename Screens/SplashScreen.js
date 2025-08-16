@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import { View, Image, StatusBar, StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import changeNavigationBarColor from 'react-native-navigation-bar-color';
 
 export default function SplashScreen({ navigation }) {
   useEffect(() => {
     // Simulate loading before going to main screen
+    changeNavigationBarColor('transparent', true, true);
     const timer = setTimeout(() => {
       navigation.replace('Login2'); // change to your main screen
     }, 2000);

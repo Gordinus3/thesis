@@ -25,6 +25,7 @@ import {
   Platform,
   StatusBar,
 } from "react-native";
+import changeNavigationBarColor from "react-native-navigation-bar-color";
 import Octicons from "react-native-vector-icons/Octicons";
 import { CommonActions } from "@react-navigation/native";
 import { ref, listAll, getDownloadURL, getMetadata, getStorage } from "firebase/storage";
@@ -61,7 +62,7 @@ const Home2 = ({ navigation }) => {
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
-          routes: [{ name: "Login" }],
+          routes: [{ name: "Login2" }],
         })
       );
     } catch (error) {
@@ -106,6 +107,7 @@ const Home2 = ({ navigation }) => {
   };
 
   useEffect(() => {
+    changeNavigationBarColor('transparent', true, true);
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
@@ -135,7 +137,7 @@ const Home2 = ({ navigation }) => {
 
   return (
     <HomeContainer style={{ backgroundColor: "#1E3D58" }}>
-      <StatusBar backgroundColor= "#1E3D58" barStyle="light-content"/>
+      <StatusBar  translucent backgroundColor= "transparent" barStyle="light-content"/>
       {/* Header */}
       <HeaderContainer>
         <TouchableOpacity onPress={show}>
@@ -178,7 +180,7 @@ const Home2 = ({ navigation }) => {
             }}>
           <SectionHeader>
             <SectionTitle>Recent Scans</SectionTitle>
-            <TouchableOpacity onPress={() => navigation.navigate("ResultScreen")}>
+            <TouchableOpacity onPress={() => navigation.navigate("ResultScreen2")}>
               <SectionLink>View all</SectionLink>
             </TouchableOpacity>
           </SectionHeader>
@@ -210,7 +212,7 @@ const Home2 = ({ navigation }) => {
               backgroundColor: "#E8EEF1", 
               borderRadius: 10,
               padding: 20,
-              height: 700,
+              height: 350,
               marginBottom: 15,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
@@ -221,7 +223,7 @@ const Home2 = ({ navigation }) => {
             }}>
           <SectionHeader>
             <SectionTitle>Recent Scans</SectionTitle>
-            <TouchableOpacity onPress={() => navigation.navigate("ResultScreen")}>
+            <TouchableOpacity onPress={() => navigation.navigate("ResultScreen2")}>
               <SectionLink>View all</SectionLink>
             </TouchableOpacity>
           </SectionHeader>

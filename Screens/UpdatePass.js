@@ -15,7 +15,8 @@ import {
   ExtraView,
 } from "./../components/styles";
 
-import { ImageBackground, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, View, StatusBar } from "react-native";
+import LinearGradient from "react-native-linear-gradient";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import Octicons from "react-native-vector-icons/Octicons";
@@ -57,12 +58,12 @@ const UpdatePass = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground
-      source={require("./../images/bg.png")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <View>
+    <LinearGradient
+          colors={['#69509A', '#00B2FF']} // top → bottom
+          start={{ x: 0, y: 0 }}          // gradient start point
+          end={{ x: 1, y: 1 }}            // gradient end point
+          style={{flex: 1}}>
+          <StatusBar translucent backgroundColor="transparent" barStyle= "light-content"/>
         <KbAvoidWrapper>
 
           <StyleContainer showsHorizontalScrollIndicator={false}>
@@ -132,8 +133,7 @@ const UpdatePass = ({ navigation }) => {
 
           </StyleContainer>
         </KbAvoidWrapper>
-      </View>
-    </ImageBackground>
+    </LinearGradient>
   );
 };
 
