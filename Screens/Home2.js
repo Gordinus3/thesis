@@ -13,7 +13,7 @@ import {
 } from "../components/styles";
 import LinearGradient from "react-native-linear-gradient";
 import { signOut, getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, onSnapshot } from "firebase/firestore";
 import {
   View,
   Text,
@@ -106,34 +106,46 @@ const Home2 = ({ navigation }) => {
     }
   };
 
-  useEffect(() => {
-    changeNavigationBarColor('transparent', true, true);
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const userDocRef = doc(db, "users", user.uid);
-          const userSnapshot = await getDoc(userDocRef);
+ useEffect(() => {
+  changeNavigationBarColor("transparent", true, true);
 
-          if (userSnapshot.exists()) {
-            const data = userSnapshot.data();
-            setUserData(data);
+  const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+    if (user) {
+      try {
+        const userDocRef = doc(db, "users", user.uid);
 
-            const url = await fetchLatestImageFromStorage();
-            if (url) {
-              setLatestImageUrl(url);
+        // Real-time Firestore listener
+        const unsubscribeUser = onSnapshot(userDocRef, async (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+            setUserData(data); // device_status updates instantly
+
+            // Optional: fetch latest image only on first load
+            if (!latestImageUrl) {
+              const url = await fetchLatestImageFromStorage();
+              if (url) {
+                setLatestImageUrl(url);
+              }
             }
+          } else {
+            setUserData(null);
+            setLatestImageUrl(null);
           }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      } else {
-        setUserData(null);
-        setLatestImageUrl(null);
-      }
-    });
+        });
 
-    return () => unsubscribe();
-  }, []);
+        return () => unsubscribeUser();
+      } catch (error) {
+        console.error("Error setting up user listener:", error);
+      }
+    } else {
+      setUserData(null);
+      setLatestImageUrl(null);
+    }
+  });
+
+  return () => unsubscribeAuth();
+}, []);
+
 
   return (
     <HomeContainer style={{ backgroundColor: "#1E3D58" }}>
