@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleContainer,
   InnerContainer,
@@ -21,29 +21,37 @@ import {
   SubPageTitle,
 } from './../components/styles';
 
-
 import LinearGradient from 'react-native-linear-gradient';
-import { Image, ImageBackground, StyleSheet, StatusBar } from 'react-native';
+import { Image, StyleSheet, StatusBar, View, ActivityIndicator } from 'react-native';
 import { Formik } from 'formik';
-import { View } from 'react-native';
 import Octicons from 'react-native-vector-icons/Octicons';
 import KbAvoidWrapper from '../components/KbAvoidWrapper';
-import { FIREBASE_AUTH, FIREBASE_DB } from '../Firebaseconfig';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { FIREBASE_AUTH } from '../Firebaseconfig';
+import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 
-
-const { brand, darklight, primary } = Colors;
+const { brand, darklight } = Colors;
 
 const Login2 = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);
-  const [errorMessage, setErrorMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(true); // check if Firebase is still loading session
   const auth = FIREBASE_AUTH;
+
+  // 🔹 Auto-redirect if already logged in
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigation.replace("Home2"); // skip login, go straight to Home2
+      } else {
+        setLoading(false); // show login form if no user
+      }
+    });
+    return unsubscribe; // cleanup
+  }, []);
 
   const handleLogin = async (values) => {
     try {
-      setErrorMessage(""); // Clear any previous error message
-
-      // Sign in the user using their email and password
+      setErrorMessage("");
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
@@ -51,13 +59,10 @@ const Login2 = ({ navigation }) => {
         setErrorMessage("Invalid user");
         return;
       }
-      // Ensure email is verified
       if (!user.emailVerified) {
         setErrorMessage("Please verify your email before logging in.");
       } else {
-        console.log(user)
-        navigation.navigate("Home2");
-
+        navigation.replace("Home2"); // ✅ replace prevents going back to login
       }
     } catch (error) {
       console.error("Login error:", error.message);
@@ -65,13 +70,22 @@ const Login2 = ({ navigation }) => {
     }
   };
 
+  if (loading) {
+    // 🔹 Show loading spinner while checking persistence
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#69509A" />
+      </View>
+    );
+  }
+
   return (
     <LinearGradient
-      colors={['#69509A', '#00B2FF']} // top → bottom
-      start={{ x: 0, y: 0 }}          // gradient start point
-      end={{ x: 1, y: 1 }}            // gradient end point
-      style={{flex: 1}}>
-      <StatusBar translucent backgroundColor="transparent" barStyle= "light-content"/>
+      colors={['#69509A', '#00B2FF']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <KbAvoidWrapper>
         <StyleContainer showsHorizontalScrollIndicator={false}>
           <InnerContainer>
@@ -79,10 +93,7 @@ const Login2 = ({ navigation }) => {
             <PageTitle>MicroVision</PageTitle>
             <SubTitle>Account Login</SubTitle>
 
-            <Formik
-              initialValues={{ email: '', password: '' }}
-              onSubmit={handleLogin}
-            >
+            <Formik initialValues={{ email: '', password: '' }} onSubmit={handleLogin}>
               {({ handleChange, handleBlur, handleSubmit, values }) => (
                 <StyledFormArea>
                   <MyTextInput
@@ -93,7 +104,6 @@ const Login2 = ({ navigation }) => {
                     onChangeText={handleChange('email')}
                     onBlur={handleBlur('email')}
                     value={values.email}
-
                   />
                   <MyTextInput
                     label="Password"
@@ -117,17 +127,9 @@ const Login2 = ({ navigation }) => {
 
                   {errorMessage ? <MessageBox>{errorMessage}</MessageBox> : null}
 
-
                   <StyledButton onPress={handleSubmit}>
                     <ButtonText>Login</ButtonText>
                   </StyledButton>
-
-                  {/* <Line>or</Line> */}
-
-                  {/* <StyledButton google={true} onPress={handleSubmit}>
-                  <AntDesign name="google" color={primary} size={25}/>
-                  <ButtonText google={true}>Continue with Google</ButtonText>
-                </StyledButton> */}
 
                   <ExtraView>
                     <ExtraText>Don't have an account yet? </ExtraText>
@@ -135,9 +137,8 @@ const Login2 = ({ navigation }) => {
                       <TextLinkContent>Sign Up</TextLinkContent>
                     </TextLink>
                   </ExtraView>
-
-
-                </StyledFormArea>)}
+                </StyledFormArea>
+              )}
             </Formik>
           </InnerContainer>
         </StyleContainer>
@@ -146,31 +147,19 @@ const Login2 = ({ navigation }) => {
   );
 };
 
-const MyTextInput = ({ label, icon, isPassword, hidePassword, setHidePassword, ...props }) => {
-  return (
-    <View>
-      <LeftIcon>
-        <Octicons name={icon} size={30} color={brand} />
-      </LeftIcon>
-      <StyledInputLabel>{label}</StyledInputLabel>
-      <StyledTextInput {...props} />
-      {isPassword && (
-        <RightIcon onPress={() => setHidePassword(!hidePassword)}>
-          <Octicons name={hidePassword ? 'eye-closed' : 'eye'} size={30} color={darklight} />
-        </RightIcon>
-      )}
-    </View>
-  )
-}
-const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
+const MyTextInput = ({ label, icon, isPassword, hidePassword, setHidePassword, ...props }) => (
+  <View>
+    <LeftIcon>
+      <Octicons name={icon} size={30} color={brand} />
+    </LeftIcon>
+    <StyledInputLabel>{label}</StyledInputLabel>
+    <StyledTextInput {...props} />
+    {isPassword && (
+      <RightIcon onPress={() => setHidePassword(!hidePassword)}>
+        <Octicons name={hidePassword ? 'eye-closed' : 'eye'} size={30} color={darklight} />
+      </RightIcon>
+    )}
+  </View>
+);
 
-  }
-});
 export default Login2;
