@@ -79,7 +79,7 @@ const ResultScreen2 = () => {
         <StatusBar translucent backgroundColor="transparent" barStyle="light-content"/>
         
       <TestHomecontainer>
-        <HomeText>Scan Results</HomeText>
+        <HomeText>Scan Reports</HomeText>
       </TestHomecontainer>
 
       {results.length > 0 ? (
@@ -115,7 +115,7 @@ const ResultScreen2 = () => {
         <View style ={{ justifyContent: "center", alignItems: "center", marginTop: 200}}>
             <Image source={require("./../images/box.png")} style={{ width: 200, height: 200, marginRight: 15}}></Image>
                 <Text style={{ fontSize: 15, fontWeight: "bold", color: "#E8EEF1", marginTop: 5 }}>
-                    No scan results available
+                    No scan reports available
                 </Text>
         </View>
       )}

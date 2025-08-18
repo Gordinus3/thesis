@@ -9,11 +9,9 @@ import {
   SectionHeader,
   SectionTitle,
   SectionLink,
-  ScanPlaceholder,
 } from "../components/styles";
-import LinearGradient from "react-native-linear-gradient";
 import { signOut, getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import {
   View,
   Text,
@@ -24,11 +22,18 @@ import {
   Image,
   Platform,
   StatusBar,
+  Linking,
 } from "react-native";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import Octicons from "react-native-vector-icons/Octicons";
 import { CommonActions } from "@react-navigation/native";
-import { ref, listAll, getDownloadURL, getMetadata, getStorage } from "firebase/storage";
+import {
+  ref,
+  listAll,
+  getDownloadURL,
+  getMetadata,
+  getStorage,
+} from "firebase/storage";
 
 const Home2 = ({ navigation }) => {
   const auth = getAuth();
@@ -37,7 +42,7 @@ const Home2 = ({ navigation }) => {
   const translateX = useRef(new Animated.Value(-300)).current;
 
   const [userData, setUserData] = useState(null);
-  const [latestImageUrl, setLatestImageUrl] = useState(null);
+  const [latestScan, setLatestScan] = useState(null); // ✅ store both image+pdf
 
   const show = () => {
     setVisible(true);
@@ -70,86 +75,108 @@ const Home2 = ({ navigation }) => {
     }
   };
 
-  const fetchLatestImageFromStorage = async () => {
+  // 🔹 Helper: fetch latest image with matching PDF
+  const fetchLatestImageWithPdf = async () => {
     try {
       const user = auth.currentUser;
       if (!user) return null;
 
       const storage = getStorage();
-      const folderRef = ref(storage, `${user.uid}/detections`);
-      const result = await listAll(folderRef);
 
-      if (result.items.length === 0) return null;
+      const reportsRef = ref(storage, `${user.uid}/reports`);
+      const detectionsRef = ref(storage, `${user.uid}/detections`);
 
-      let latestFile = null;
-      let latestTimestamp = 0;
+      // Get PDFs
+      const reportResult = await listAll(reportsRef);
+      const reportFiles = await Promise.all(
+        reportResult.items.map(async (itemRef) => {
+          const metadata = await getMetadata(itemRef);
+          return {
+            name: itemRef.name,
+            time: new Date(metadata.timeCreated).getTime(),
+            url: await getDownloadURL(itemRef),
+          };
+        })
+      );
 
-      for (const itemRef of result.items) {
-        const metadata = await getMetadata(itemRef);
-        const fileTime = new Date(metadata.timeCreated).getTime();
+      if (reportFiles.length === 0) return null;
 
-        if (fileTime > latestTimestamp) {
-          latestTimestamp = fileTime;
-          latestFile = itemRef;
-        }
-      }
+      reportFiles.sort((a, b) => b.time - a.time);
+      const latestPdf = reportFiles[0];
 
-      if (latestFile) {
-        const url = await getDownloadURL(latestFile);
-        return url;
-      }
+      // Get images
+      const detectionResult = await listAll(detectionsRef);
+      const detectionFiles = await Promise.all(
+        detectionResult.items.map(async (itemRef) => {
+          const metadata = await getMetadata(itemRef);
+          return {
+            name: itemRef.name,
+            time: new Date(metadata.timeCreated).getTime(),
+            url: await getDownloadURL(itemRef),
+          };
+        })
+      );
 
-      return null;
+      // Match prefix
+      const pdfPrefix = latestPdf.name.split("_")[0];
+      const matchingImages = detectionFiles.filter((img) =>
+        img.name.startsWith(pdfPrefix)
+      );
+
+      if (matchingImages.length === 0) return null;
+
+      return {
+        pdfUrl: latestPdf.url,
+        imageUrl: matchingImages[0].url,
+      };
     } catch (error) {
-      console.error("Error fetching latest image:", error);
+      console.error("Error fetching latest image with PDF:", error);
       return null;
     }
   };
 
- useEffect(() => {
-  changeNavigationBarColor("transparent", true, true);
+  useEffect(() => {
+    changeNavigationBarColor("transparent", true, true);
 
-  const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-    if (user) {
-      try {
-        const userDocRef = doc(db, "users", user.uid);
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        try {
+          const userDocRef = doc(db, "users", user.uid);
 
-        // Real-time Firestore listener
-        const unsubscribeUser = onSnapshot(userDocRef, async (snapshot) => {
-          if (snapshot.exists()) {
-            const data = snapshot.data();
-            setUserData(data); // device_status updates instantly
+          // Real-time Firestore listener
+          const unsubscribeUser = onSnapshot(userDocRef, async (snapshot) => {
+            if (snapshot.exists()) {
+              const data = snapshot.data();
+              setUserData(data);
 
-            // Optional: fetch latest image only on first load
-            if (!latestImageUrl) {
-              const url = await fetchLatestImageFromStorage();
-              if (url) {
-                setLatestImageUrl(url);
+              // Only fetch scans once
+              if (!latestScan) {
+                const scan = await fetchLatestImageWithPdf();
+                if (scan) setLatestScan(scan);
               }
+            } else {
+              setUserData(null);
+              setLatestScan(null);
             }
-          } else {
-            setUserData(null);
-            setLatestImageUrl(null);
-          }
-        });
+          });
 
-        return () => unsubscribeUser();
-      } catch (error) {
-        console.error("Error setting up user listener:", error);
+          return () => unsubscribeUser();
+        } catch (error) {
+          console.error("Error setting up user listener:", error);
+        }
+      } else {
+        setUserData(null);
+        setLatestScan(null);
       }
-    } else {
-      setUserData(null);
-      setLatestImageUrl(null);
-    }
-  });
+    });
 
-  return () => unsubscribeAuth();
-}, []);
-
+    return () => unsubscribeAuth();
+  }, []);
 
   return (
     <HomeContainer style={{ backgroundColor: "#1E3D58" }}>
-      <StatusBar  translucent backgroundColor= "transparent" barStyle="light-content"/>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+
       {/* Header */}
       <HeaderContainer>
         <TouchableOpacity onPress={show}>
@@ -172,30 +199,29 @@ const Home2 = ({ navigation }) => {
         </View>
       </DeviceCard>
 
-      {/* Recent Scans Header */}
-      
+      {/* Recent Scans */}
+      <View
+        style={{
+          backgroundColor: "#E8EEF1",
+          borderRadius: 10,
+          padding: 20,
+          marginBottom: 15,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.15,
+          shadowRadius: 4,
+          elevation: 10,
+          overflow: "hidden",
+        }}
+      >
+        <SectionHeader>
+          <SectionTitle>Recent Scans</SectionTitle>
+          <TouchableOpacity onPress={() => navigation.navigate("ResultScreen2")}>
+            <SectionLink>View all</SectionLink>
+          </TouchableOpacity>
+        </SectionHeader>
 
-      {/* Recent Scan Card */}
-      {latestImageUrl ? (
-        <View style={{ 
-              backgroundColor: "#E8EEF1", 
-              borderRadius: 10,
-              padding: 20,
-              height: 350,
-              marginBottom: 15,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.15,
-              shadowRadius: 4,
-              elevation: 10,
-              overflow: "hidden",
-            }}>
-          <SectionHeader>
-            <SectionTitle>Recent Scans</SectionTitle>
-            <TouchableOpacity onPress={() => navigation.navigate("ResultScreen2")}>
-              <SectionLink>View all</SectionLink>
-            </TouchableOpacity>
-          </SectionHeader>
+        {latestScan ? (
           <View
             style={{
               backgroundColor: "#e8eef1",
@@ -215,30 +241,29 @@ const Home2 = ({ navigation }) => {
               }),
             }}
           >
-            <Image source={{ uri: latestImageUrl }} style={{ width: "100%", height: 200}} resizeMode="contain" />
-          </View>
-        </View>
-        
-      ) : (
-        <View style={{ 
-              backgroundColor: "#E8EEF1", 
-              borderRadius: 10,
-              padding: 20,
-              height: 350,
-              marginBottom: 15,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.15,
-              shadowRadius: 4,
-              elevation: 10,
-              overflow: "hidden",
-            }}>
-          <SectionHeader>
-            <SectionTitle>Recent Scans</SectionTitle>
-            <TouchableOpacity onPress={() => navigation.navigate("ResultScreen2")}>
-              <SectionLink>View all</SectionLink>
+            <Image
+              source={{ uri: latestScan.imageUrl }}
+              style={{ width: "100%", height: 200 }}
+              resizeMode="contain"
+            />
+            <TouchableOpacity
+              onPress={() => Linking.openURL(latestScan.pdfUrl)}
+              style={{
+                alignContent: "center",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: 10,
+                backgroundColor: "#00B2FF",
+                padding: 10,
+                borderRadius: 10,
+              }}
+            >
+              <Text style={{ color: "#E8EEF1", fontWeight: "bold" }}>
+                View PDF Report
+              </Text>
             </TouchableOpacity>
-          </SectionHeader>
+          </View>
+        ) : (
           <View
             style={{
               backgroundColor: "#e8eef1",
@@ -258,9 +283,12 @@ const Home2 = ({ navigation }) => {
               }),
             }}
           >
+            <Text style={{ fontSize: 15, fontWeight: "bold", color: "#1E3D58" }}>
+              No recent scans
+            </Text>
           </View>
-        </View>
-      )}
+        )}
+      </View>
 
       {/* Modal Menu */}
       <Modal visible={visible} transparent animationType="none">
@@ -276,7 +304,7 @@ const Home2 = ({ navigation }) => {
                   width: "60%",
                   backgroundColor: "white",
                   padding: 20,
-                  justifyContent:"space-between",
+                  justifyContent: "space-between",
                   transform: [{ translateX }],
                 }}
               >
