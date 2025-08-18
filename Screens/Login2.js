@@ -19,6 +19,7 @@ import {
   TextLinkContent,
   Spacer,
   SubPageTitle,
+  Line,
 } from './../components/styles';
 
 import LinearGradient from 'react-native-linear-gradient';
@@ -73,9 +74,20 @@ const Login2 = ({ navigation }) => {
   if (loading) {
     // 🔹 Show loading spinner while checking persistence
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#69509A" />
-      </View>
+      <LinearGradient
+      colors={['#69509A', '#00B2FF']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{ flex: 1 }}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center"}}>
+          <Image
+                  source={require('./../images/Logo.png')}
+                  style={{ width: 150, height: 150, marginBottom: 20 }}
+                  resizeMode="contain"
+                />
+          <ActivityIndicator size="large" color="#FFFF" />
+        </View>
+      </LinearGradient>
     );
   }
 
