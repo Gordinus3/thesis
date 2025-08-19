@@ -186,19 +186,22 @@ const Home2 = ({ navigation }) => {
       </HeaderContainer>
 
       {/* Device Status Card */}
-      <DeviceCard>
-        <Image
-          source={require("./../images/device.png")}
-          style={{ width: 60, height: 60, marginRight: 15 }}
-        />
-        <View>
-          <DeviceTitle>MicroVision</DeviceTitle>
-          <DeviceStatus status={userData?.device_status || "Disconnected"}>
-            {userData?.device_status || "Disconnected"}
-          </DeviceStatus>
-        </View>
-      </DeviceCard>
-
+      <TouchableOpacity
+        onPress={() => navigation.navigate("DeviceScreen")}
+      >
+        <DeviceCard>
+          <Image
+            source={require("./../images/device.png")}
+            style={{ width: 60, height: 60, marginRight: 15 }}
+          />
+          <View>
+            <DeviceTitle>MicroVision</DeviceTitle>
+            <DeviceStatus status={userData?.device_status || "Disconnected"}>
+              {userData?.device_status || "Disconnected"}
+            </DeviceStatus>
+          </View>
+        </DeviceCard>
+      </TouchableOpacity>
       {/* Recent Scans */}
       <View
         style={{
