@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Image, TouchableOpacity, Linking, StatusBar} from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity, Linking, StatusBar, TextInput} from "react-native";
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
 import { storage } from "../Firebaseconfig";
 import { HomeContainer, TestHomecontainer, HomeText, background } from "../components/styles";
+import Octicons from 'react-native-vector-icons/Octicons';
 
 const DeviceScreen = () => {
   const [results, setResults] = useState([]);
@@ -101,11 +102,40 @@ const DeviceScreen = () => {
             </View>
         </View>
 
-        <ScrollView style={{ width: '100%' }}>  
-            <View style={{ flexDirection: 'column', justifyContent: 'center', backgroundColor: '#fff', padding: 10, borderRadius: 10 }}>
-                
-            </View>
-        </ScrollView>
+        <View style={{ flexDirection: 'column', justifyContent: 'center', backgroundColor: '#fff', padding: 10, borderRadius: 10 }}>
+            <Text style ={{fontSize: 20, color: '#1E3D58', fontWeight: 'bold'}}>Scan Parameters</Text>
+            <ScrollView style={{ marginTop: 10 }}>
+                <View style={{ width: '100%', margin: 5, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 10, }}>
+                    <Text style ={{fontSize: 16, color: '#1E3D58', fontWeight: 'bold'}}>Detection Mode</Text>
+                    <View style={{ flexDirection: 'column', justifyContent: 'flex-start', }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginTop: 10, }}>
+                            <TouchableOpacity style = {{ backgroundColor: '#00B2FF', height:25, width:25, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+                                <Octicons name={"check"} size={20} color={"#ffff"} />
+                            </TouchableOpacity>
+                            <Text style ={{fontSize: 16, color: '#1E3D58', marginLeft: 5}}>Visible Light</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginTop: 10, }}>
+                            <TouchableOpacity style = {{ backgroundColor: '#69509A', height:25, width:25, borderRadius: 25, justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+                            </TouchableOpacity>
+                            <Text style ={{fontSize: 16, color: '#1E3D58', marginLeft: 5}}>UV Light</Text>
+                        </View>
+                    </View>
+                </View>
+                <View style={{ width: '100%', margin: 5, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 10, }}>
+                    <Text style ={{fontSize: 16, color: '#1E3D58', fontWeight: 'bold'}}>Detection Threshold</Text>
+                    <Text style ={{fontSize: 14, color: '#1E3D58',}}>Enter value between 0.5 and 1.0</Text>
+                    <View style={{ flexDirection: 'column', justifyContent: 'flex-start', }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginTop: 10, }}>
+                            <TextInput style={{ height: 40, borderColor: '#ccc', borderWidth: 1, borderRadius: 5, paddingHorizontal: 10, width: '80%', placeholderTextColor: '#999', color: '#1E3D58' }}
+                                placeholder="Enter threshold value"
+                                keyboardType="numeric">
+
+                            </TextInput>
+                        </View>
+                    </View>
+                </View>
+            </ScrollView>
+        </View>
     </HomeContainer>
   );
 };
