@@ -215,7 +215,7 @@ export const LogoutButton= styled(TouchableOpacity)`
   width: 30%;
 `;
 export const HomeText = styled(Text)`
-  margin-top:5px;
+  margin-top:25px;
   left:15px;
   font-size: 20px;
   color: #fff;
