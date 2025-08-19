@@ -112,7 +112,7 @@ const SignUp = ({ navigation }) => {
                   alert("A verification email has been sent. Please check your inbox and verify your email before logging in.");
 
                   // Navigate to the login screen after signing up
-                  navigation.navigate('Login');
+                  navigation.navigate('Login2');
 
                 } catch (error) {
                   console.error("Signup error:", error.message);

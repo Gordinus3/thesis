@@ -11,7 +11,7 @@ import {
   SectionLink,
 } from "../components/styles";
 import { signOut, getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, onSnapshot } from "firebase/firestore";
+import { getFirestore, doc, onSnapshot, getDoc } from "firebase/firestore";
 import {
   View,
   Text,
@@ -23,6 +23,8 @@ import {
   Platform,
   StatusBar,
   Linking,
+  ActivityIndicator,
+  FlatList,
 } from "react-native";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import Octicons from "react-native-vector-icons/Octicons";
@@ -42,7 +44,10 @@ const Home2 = ({ navigation }) => {
   const translateX = useRef(new Animated.Value(-300)).current;
 
   const [userData, setUserData] = useState(null);
-  const [latestScan, setLatestScan] = useState(null); // ✅ store both image+pdf
+  const [latestScan, setLatestScan] = useState(null);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const show = () => {
     setVisible(true);
@@ -78,6 +83,7 @@ const Home2 = ({ navigation }) => {
   // 🔹 Helper: fetch latest image with matching PDF
   const fetchLatestImageWithPdf = async () => {
     try {
+      setLoading(true);
       const user = auth.currentUser;
       if (!user) return null;
 
@@ -132,6 +138,8 @@ const Home2 = ({ navigation }) => {
     } catch (error) {
       console.error("Error fetching latest image with PDF:", error);
       return null;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -141,6 +149,7 @@ const Home2 = ({ navigation }) => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         try {
+          setLoading(true);
           const userDocRef = doc(db, "users", user.uid);
 
           // Real-time Firestore listener
@@ -149,7 +158,6 @@ const Home2 = ({ navigation }) => {
               const data = snapshot.data();
               setUserData(data);
 
-              // Only fetch scans once
               if (!latestScan) {
                 const scan = await fetchLatestImageWithPdf();
                 if (scan) setLatestScan(scan);
@@ -158,140 +166,151 @@ const Home2 = ({ navigation }) => {
               setUserData(null);
               setLatestScan(null);
             }
+            setLoading(false);
           });
 
           return () => unsubscribeUser();
         } catch (error) {
           console.error("Error setting up user listener:", error);
+          setLoading(false);
         }
       } else {
         setUserData(null);
         setLatestScan(null);
+        setLoading(false);
       }
     });
 
     return () => unsubscribeAuth();
   }, []);
 
+  // 🔹 Pull-to-refresh handler
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+
+      const scan = await fetchLatestImageWithPdf();
+      if (scan) setLatestScan(scan);
+
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const snapshot = await getDoc(userDocRef);
+        if (snapshot.exists()) {
+          setUserData(snapshot.data());
+        }
+      }
+    } catch (error) {
+      console.error("Refresh error:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <HomeContainer style={{ backgroundColor: "#1E3D58" }}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
-      {/* Header */}
-      <HeaderContainer>
-        <TouchableOpacity onPress={show}>
-          <Octicons name="person" size={30} color="#fff" />
-        </TouchableOpacity>
-        <HeaderText>Welcome, {userData?.fullName || "User"}</HeaderText>
-      </HeaderContainer>
+      <FlatList
+        data={["header", "device", "recent"]}
+        keyExtractor={(item) => item}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        renderItem={({ item }) => {
+          if (item === "header") {
+            return (
+              <HeaderContainer>
+                <TouchableOpacity onPress={show}>
+                  <Octicons name="person" size={30} color="#fff" />
+                </TouchableOpacity>
+                <HeaderText>Welcome, {userData?.fullName || "User"}</HeaderText>
+              </HeaderContainer>
+            );
+          }
 
-      {/* Device Status Card */}
-      <TouchableOpacity
-        onPress={() => navigation.navigate("DeviceScreen")}
-      >
-        <DeviceCard>
-          <Image
-            source={require("./../images/device.png")}
-            style={{ width: 60, height: 60, marginRight: 15 }}
-          />
-          <View>
-            <DeviceTitle>MicroVision</DeviceTitle>
-            <DeviceStatus status={userData?.device_status || "Disconnected"}>
-              {userData?.device_status || "Disconnected"}
-            </DeviceStatus>
-          </View>
-        </DeviceCard>
-      </TouchableOpacity>
-      {/* Recent Scans */}
-      <View
-        style={{
-          backgroundColor: "#E8EEF1",
-          borderRadius: 10,
-          padding: 20,
-          marginBottom: 15,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.15,
-          shadowRadius: 4,
-          elevation: 10,
-          overflow: "hidden",
+          if (item === "device") {
+            return (
+              <TouchableOpacity onPress={() => navigation.navigate("DeviceScreen")}>
+                <DeviceCard>
+                  <Image
+                    source={require("./../images/device.png")}
+                    style={{ width: 60, height: 60, marginRight: 15 }}
+                  />
+                  <View>
+                    <DeviceTitle>MicroVision</DeviceTitle>
+                    <DeviceStatus status={userData?.device_status || "Disconnected"}>
+                      {userData?.device_status || "Disconnected"}
+                    </DeviceStatus>
+                  </View>
+                </DeviceCard>
+              </TouchableOpacity>
+            );
+          }
+
+          if (item === "recent") {
+            return (
+              <View
+                style={{
+                  backgroundColor: "#E8EEF1",
+                  borderRadius: 10,
+                  padding: 20,
+                  marginBottom: 15,
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.15,
+                      shadowRadius: 4,
+                    },
+                    android: {
+                      elevation: 10,
+                    },
+                  }),
+                }}
+              >
+                <SectionHeader>
+                  <SectionTitle>Recent Scans</SectionTitle>
+                  <TouchableOpacity onPress={() => navigation.navigate("ResultScreen2")}>
+                    <SectionLink>View all</SectionLink>
+                  </TouchableOpacity>
+                </SectionHeader>
+
+                {loading ? (
+                  <ActivityIndicator size="large" color="#69509A" />
+                ) : latestScan ? (
+                  <View>
+                    <Image
+                      source={{ uri: latestScan.imageUrl }}
+                      style={{ width: "100%", height: 200 }}
+                      resizeMode="contain"
+                    />
+                    <TouchableOpacity
+                      onPress={() => Linking.openURL(latestScan.pdfUrl)}
+                      style={{
+                        alignItems: "center",
+                        marginTop: 10,
+                        backgroundColor: "#00B2FF",
+                        padding: 10,
+                        borderRadius: 10,
+                      }}
+                    >
+                      <Text style={{ color: "#E8EEF1", fontWeight: "bold" }}>
+                        View PDF Report
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <Text style={{ textAlign: "center", color: "gray" }}>
+                    No scans available
+                  </Text>
+                )}
+              </View>
+            );
+          }
+
+          return null;
         }}
-      >
-        <SectionHeader>
-          <SectionTitle>Recent Scans</SectionTitle>
-          <TouchableOpacity onPress={() => navigation.navigate("ResultScreen2")}>
-            <SectionLink>View all</SectionLink>
-          </TouchableOpacity>
-        </SectionHeader>
-
-        {latestScan ? (
-          <View
-            style={{
-              backgroundColor: "#e8eef1",
-              borderRadius: 10,
-              padding: 20,
-              overflow: "hidden",
-              ...Platform.select({
-                ios: {
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.15,
-                  shadowRadius: 4,
-                },
-                android: {
-                  elevation: 10,
-                },
-              }),
-            }}
-          >
-            <Image
-              source={{ uri: latestScan.imageUrl }}
-              style={{ width: "100%", height: 200 }}
-              resizeMode="contain"
-            />
-            <TouchableOpacity
-              onPress={() => Linking.openURL(latestScan.pdfUrl)}
-              style={{
-                alignContent: "center",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: 10,
-                backgroundColor: "#00B2FF",
-                padding: 10,
-                borderRadius: 10,
-              }}
-            >
-              <Text style={{ color: "#E8EEF1", fontWeight: "bold" }}>
-                View PDF Report
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View
-            style={{
-              backgroundColor: "#e8eef1",
-              borderRadius: 10,
-              padding: 20,
-              overflow: "hidden",
-              ...Platform.select({
-                ios: {
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.15,
-                  shadowRadius: 4,
-                },
-                android: {
-                  elevation: 10,
-                },
-              }),
-            }}
-          >
-            <Text style={{ fontSize: 15, fontWeight: "bold", color: "#1E3D58" }}>
-              No recent scans
-            </Text>
-          </View>
-        )}
-      </View>
+      />
 
       {/* Modal Menu */}
       <Modal visible={visible} transparent animationType="none">

@@ -4,7 +4,7 @@ import changeNavigationBarColor from "react-native-navigation-bar-color";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, setDoc, onSnapshot, getDoc, serverTimestamp } from "firebase/firestore";
 import { FIREBASE_DB as db, FIREBASE_AUTH as auth } from "../Firebaseconfig";
-import { HomeContainer, TestHomecontainer, HomeText } from "../components/styles";
+import { HomeContainer, TestHomecontainer, HomeText, DeviceStatus } from "../components/styles";
 import Octicons from "react-native-vector-icons/Octicons";
 
 const DeviceScreen = () => {
@@ -67,7 +67,7 @@ const DeviceScreen = () => {
           
           // Update status
           if (data.status) {
-            setDeviceStatus(data.status.device_status || "Ready");
+            setDeviceStatus(data.device_status || "Ready");
           }
         }
       }, (error) => {
@@ -167,8 +167,12 @@ const DeviceScreen = () => {
           backgroundColor: "#fff",
           padding: 10,
           borderRadius: 10,
-        }}
-      >
+        }}> 
+        <View>
+          <DeviceStatus status={deviceStatus || "Disconnected"} style ={{paddingLeft: 10}}>
+            {deviceStatus|| "Disconnected"}
+          </DeviceStatus>
+        </View>
         <View
           style={{
             width: "100%",

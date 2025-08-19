@@ -12,11 +12,12 @@ export const Colors = {
   brand: "#00B2FF",
   green: "#10B981",
   red: "#f37272ff",
+  brandViolet: "#ad90e7ff",
   see:'rgba(0,0,0,0)',
   detailcolor: '#E7EDFF',
 };
 
-const { primary,secondary,tertiary,darklight,brand,green,red,detailcolor } = Colors;
+const { primary,secondary,tertiary,darklight,brand,green,red,brandViolet,detailcolor } = Colors;
 
 export const StyleContainer = styled(View)`
   flex: 1;
@@ -236,7 +237,7 @@ export const HomeContainer = styled(View)`
       align-items: start;
       gap: 8;
       padding:20px; 
-      padding-top: ${StatusBarHeight + 5}px;
+      padding-top: ${StatusBarHeight - 10}px;
 `;
 export const TextUserWelcom = styled(Text)`
       font-size: 15px;
@@ -320,7 +321,12 @@ export const DeviceTitle = styled(Text)`
 export const DeviceStatus = styled(Text)`
   font-size: 20px;
   font-weight: bold;
-  color: ${(props) => (props.status === "Ready" ? green : red)};
+  color: ${(props) =>
+    props.status === "Ready"
+      ? green
+      : props.status === "Scanning"
+      ? brandViolet
+      : red};
 `;
 
 // Section header (Recent Scans)
