@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StatusBar, TextInput } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, TextInput, Alert } from "react-native";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, setDoc, onSnapshot, getDoc, serverTimestamp } from "firebase/firestore";
 import { FIREBASE_DB as db, FIREBASE_AUTH as auth } from "../Firebaseconfig";
 import { HomeContainer, TestHomecontainer, HomeText, DeviceStatus } from "../components/styles";
 import Octicons from "react-native-vector-icons/Octicons";
-import { Flatlist } from "react-native-gesture-handler";
 import KbAvoidWrapper from "../components/KbAvoidWrapper";
 
 const DeviceScreen = () => {
@@ -156,6 +155,10 @@ const DeviceScreen = () => {
     }
   };
 
+  const showAlert = (title, message) => {
+    Alert.alert(title, message, [{ text: "OK" }], { cancelable: true });
+  };
+
   return (
     <HomeContainer style={{ backgroundColor: "#1E3D58", padding: 20}}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
@@ -208,7 +211,13 @@ const DeviceScreen = () => {
                   justifyContent: "center",
                   alignItems: "center",
                 }}
-                onPress={() => {sendStartCommand(); setIsScanning(true);}}
+                onPress={() => {
+                  if(deviceStatus==="Disconnected"){
+                    showAlert("Device Disconnected","Cannot start detection when device is disconnected.");
+                  }else {
+                    sendStartCommand(); setIsScanning(true);
+                  }
+                  }}
               >
                 <Text style={{ color: "#FFFF", fontSize: 16 }}>Start Detection</Text>
               </TouchableOpacity>
