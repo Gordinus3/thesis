@@ -6,12 +6,15 @@ import { doc, setDoc, onSnapshot, getDoc, serverTimestamp } from "firebase/fires
 import { FIREBASE_DB as db, FIREBASE_AUTH as auth } from "../Firebaseconfig";
 import { HomeContainer, TestHomecontainer, HomeText, DeviceStatus } from "../components/styles";
 import Octicons from "react-native-vector-icons/Octicons";
+import { Flatlist } from "react-native-gesture-handler";
+import KbAvoidWrapper from "../components/KbAvoidWrapper";
 
 const DeviceScreen = () => {
   const [user, setUser] = useState(null);
   const [detectionMode, setDetectionMode] = useState("visible");
   const [threshold, setThreshold] = useState("0.5");
   const [deviceStatus, setDeviceStatus] = useState("Ready");
+  const [isScanning, setIsScanning] = useState(false);
 
   useEffect(() => {
     changeNavigationBarColor("transparent", true, true);
@@ -119,6 +122,7 @@ const DeviceScreen = () => {
             start_detection: true,
             detection_mode: detectionMode,
             detection_threshold: parseFloat(threshold) || 0.5,
+            timestamp: serverTimestamp(),
           },
           timestamp: serverTimestamp(),
         },
@@ -141,6 +145,7 @@ const DeviceScreen = () => {
         {
           commands: {
             start_detection: false,
+            timestamp: serverTimestamp(),
           },
           timestamp: serverTimestamp(),
         },
@@ -160,176 +165,185 @@ const DeviceScreen = () => {
       </TestHomecontainer>
 
       {/* Status & Buttons */}
-      <View
-        style={{
-          flexDirection: "column",
-          justifyContent: "center",
-          backgroundColor: "#fff",
-          padding: 10,
-          borderRadius: 10,
-        }}> 
-        <View>
-          <DeviceStatus status={deviceStatus || "Disconnected"} style ={{paddingLeft: 10}}>
-            {deviceStatus|| "Disconnected"}
-          </DeviceStatus>
-        </View>
-        <View
-          style={{
-            width: "100%",
-            height: 200,
-            margin: 5,
-            padding: 10,
-            backgroundColor: "#f0f0f0",
-            borderRadius: 10,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ fontSize: 16, color: "#333", fontWeight: "bold" }}>
-            Start detection to view feed
-          </Text>
-        </View>
-        <View>
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#00B2FF",
-              padding: 10,
-              borderRadius: 5,
-              marginTop: 10,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            onPress={sendStartCommand}
-          >
-            <Text style={{ color: "#E8EEF1", fontSize: 16 }}>Start Detection</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#69509A",
-              padding: 10,
-              borderRadius: 5,
-              marginTop: 10,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            onPress={sendStopCommand}
-          >
-            <Text style={{ color: "#FFFF", fontSize: 16 }}>Stop Detection</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Scan Parameters */}
-      <View
-        style={{
-          flexDirection: "column",
-          justifyContent: "center",
-          backgroundColor: "#fff",
-          padding: 10,
-          borderRadius: 10,
-          marginTop: 15,
-        }}
-      >
-        <Text style={{ fontSize: 20, color: "#1E3D58", fontWeight: "bold" }}>Scan Parameters</Text>
-        <ScrollView style={{ marginTop: 10 }}>
-          {/* Detection Mode */}
+      <KbAvoidWrapper>
+        <View style={{ flex: 1, marginTop: 10 }}>
           <View
             style={{
-              width: "100%",
-              margin: 5,
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#fff",
               padding: 10,
-              backgroundColor: "#f0f0f0",
               borderRadius: 10,
-            }}
-          >
-            <Text style={{ fontSize: 16, color: "#1E3D58", fontWeight: "bold" }}>
-              Detection Mode
-            </Text>
-            <View style={{ flexDirection: "column", justifyContent: "flex-start" }}>
-              {/* Visible Light */}
-              <TouchableOpacity
+            }}> 
+            <View>
+              <DeviceStatus status={deviceStatus || "Disconnected"}>
+                {deviceStatus|| "Disconnected"}
+              </DeviceStatus>
+            </View>
+            <View
+              style={{
+                width: "100%",
+                height: 200,
+                margin: 5,
+                padding: 10,
+                backgroundColor: "#f0f0f0",
+                borderRadius: 10,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 16, color: "#333", fontWeight: "bold" }}>
+                Start detection to view feed
+              </Text>
+            </View>
+            <View style={{ flexDirection: "column",width: "100%" }}>
+              {!isScanning ? (
+                <TouchableOpacity
                 style={{
-                  flexDirection: "row",
-                  alignItems: "center",
+                  backgroundColor: "#00B2FF",
+                  padding: 10,
+                  borderRadius: 5,
                   marginTop: 10,
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
-                onPress={() => setDetectionMode("visible")}
+                onPress={() => {sendStartCommand(); setIsScanning(true);}}
               >
-                <View
-                  style={{
-                    backgroundColor: detectionMode === "visible" ? "#00B2FF" : "#ccc",
-                    height: 25,
-                    width: 25,
-                    borderRadius: 25,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  {detectionMode === "visible" && <Octicons name={"check"} size={20} color={"#fff"} />}
-                </View>
-                <Text style={{ fontSize: 16, color: "#1E3D58", marginLeft: 5 }}>Visible Light</Text>
+                <Text style={{ color: "#FFFF", fontSize: 16 }}>Start Detection</Text>
               </TouchableOpacity>
-
-              {/* UV Light */}
-              <TouchableOpacity
+              ):(
+                <TouchableOpacity
                 style={{
-                  flexDirection: "row",
-                  alignItems: "center",
+                  backgroundColor: "#69509A",
+                  padding: 10,
+                  borderRadius: 5,
                   marginTop: 10,
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
-                onPress={() => setDetectionMode("uv")}
+                onPress={() => {sendStopCommand(); setIsScanning(false);}}
               >
-                <View
-                  style={{
-                    backgroundColor: detectionMode === "uv" ? "#69509A" : "#ccc",
-                    height: 25,
-                    width: 25,
-                    borderRadius: 25,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  {detectionMode === "uv" && <Octicons name={"check"} size={20} color={"#fff"} />}
-                </View>
-                <Text style={{ fontSize: 16, color: "#1E3D58", marginLeft: 5 }}>UV Light</Text>
+                <Text style={{ color: "#FFFF", fontSize: 16 }}>Stop Detection</Text>
               </TouchableOpacity>
+              )}
+              
             </View>
           </View>
 
-          {/* Detection Threshold */}
+          {/* Scan Parameters */}
           <View
             style={{
-              width: "100%",
-              margin: 5,
+              flexDirection: "column",
+              justifyContent: "center",
+              backgroundColor: "#fff",
               padding: 10,
-              backgroundColor: "#f0f0f0",
+              paddingRight:20,
               borderRadius: 10,
+              marginTop: 15,
             }}
           >
-            <Text style={{ fontSize: 16, color: "#1E3D58", fontWeight: "bold" }}>
-              Detection Threshold
-            </Text>
-            <Text style={{ fontSize: 14, color: "#1E3D58" }}>Enter value between 0.5 and 1.0</Text>
-            <TextInput
-              style={{
-                height: 40,
-                borderColor: "#ccc",
-                borderWidth: 1,
-                borderRadius: 5,
-                paddingHorizontal: 10,
-                marginTop: 10,
-                width: "80%",
-                color: "#1E3D58",
-              }}
-              placeholder="Enter threshold value"
-              keyboardType="numeric"
-              value={threshold}
-              onChangeText={setThreshold}
-              placeholderTextColor="#9CA3AF"
-            />
+            <Text style={{ fontSize: 20, color: "#1E3D58", fontWeight: "bold" }}>Scan Parameters</Text>
+
+              {/* Detection Mode */}
+              <View
+                style={{
+                  width: "100%",
+                  margin: 5,
+                  padding: 10,
+                  backgroundColor: "#f0f0f0",
+                  borderRadius: 10,
+                }}
+              >
+                <Text style={{ fontSize: 16, color: "#1E3D58", fontWeight: "bold" }}>
+                  Detection Mode
+                </Text>
+                <View style={{ flexDirection: "column", justifyContent: "flex-start" }}>
+                  {/* Visible Light */}
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 10,
+                    }}
+                    onPress={() => setDetectionMode("visible")}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: detectionMode === "visible" ? "#00B2FF" : "#ccc",
+                        height: 25,
+                        width: 25,
+                        borderRadius: 25,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      {detectionMode === "visible" && <Octicons name={"check"} size={20} color={"#fff"} />}
+                    </View>
+                    <Text style={{ fontSize: 16, color: "#1E3D58", marginLeft: 5 }}>Visible Light</Text>
+                  </TouchableOpacity>
+
+                  {/* UV Light */}
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 10,
+                    }}
+                    onPress={() => setDetectionMode("uv")}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: detectionMode === "uv" ? "#69509A" : "#ccc",
+                        height: 25,
+                        width: 25,
+                        borderRadius: 25,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      {detectionMode === "uv" && <Octicons name={"check"} size={20} color={"#fff"} />}
+                    </View>
+                    <Text style={{ fontSize: 16, color: "#1E3D58", marginLeft: 5 }}>UV Light</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Detection Threshold */}
+              <View
+                style={{
+                  width: "100%",
+                  margin: 5,
+                  padding: 10,
+                  backgroundColor: "#f0f0f0",
+                  borderRadius: 10,
+                }}
+              >
+                <Text style={{ fontSize: 16, color: "#1E3D58", fontWeight: "bold" }}>
+                  Detection Threshold
+                </Text>
+                <Text style={{ fontSize: 14, color: "#1E3D58" }}>Enter value between 0.5 and 1.0</Text>
+                <TextInput
+                  style={{
+                    height: 40,
+                    borderColor: "#ccc",
+                    borderWidth: 1,
+                    borderRadius: 5,
+                    paddingHorizontal: 10,
+                    marginTop: 10,
+                    width: "80%",
+                    color: "#1E3D58",
+                  }}
+                  placeholder="Enter threshold value"
+                  keyboardType="numeric"
+                  value={threshold}
+                  onChangeText={setThreshold}
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
           </View>
-        </ScrollView>
-      </View>
+        </View>
+      </KbAvoidWrapper>
     </HomeContainer>
   );
 };
