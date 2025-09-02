@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, TextInput, Alert } from "react-native";
+import Dialog from "react-native-dialog";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, setDoc, onSnapshot, getDoc, serverTimestamp } from "firebase/firestore";
@@ -14,6 +15,7 @@ const DeviceScreen = () => {
   const [threshold, setThreshold] = useState("0.5");
   const [deviceStatus, setDeviceStatus] = useState("Ready");
   const [isScanning, setIsScanning] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
     changeNavigationBarColor("transparent", true, true);
@@ -155,9 +157,7 @@ const DeviceScreen = () => {
     }
   };
 
-  const showAlert = (title, message) => {
-    Alert.alert(title, message, [{ text: "OK" }], { cancelable: true });
-  };
+
 
   return (
     <HomeContainer style={{ backgroundColor: "#1E3D58", padding: 20}}>
@@ -201,6 +201,11 @@ const DeviceScreen = () => {
               </Text>
             </View>
             <View style={{ flexDirection: "column",width: "100%" }}>
+              <Dialog.Container contentStyle={{ borderRadius: 10, backgroundColor: "#E8EEF1"}} visible={showDialog}>
+                      <Dialog.Title style={{color: "#1E3D58"}}>Device Disconnected</Dialog.Title>
+                      <Dialog.Description style={{color: "#1E3D58"}}>Cannot start detection when device is disconnected.</Dialog.Description>
+                      <Dialog.Button label="OK"  style={{color: "#00B2FF", fontWeight: "bold", fontSize: 15}} onPress={() => setShowDialog(false)} />
+                    </Dialog.Container>
               {!isScanning ? (
                 <TouchableOpacity
                 style={{
@@ -213,7 +218,7 @@ const DeviceScreen = () => {
                 }}
                 onPress={() => {
                   if(deviceStatus==="Disconnected"){
-                    showAlert("Device Disconnected","Cannot start detection when device is disconnected.");
+                    setShowDialog(true);
                   }else {
                     sendStartCommand(); setIsScanning(true);
                   }
