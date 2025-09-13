@@ -15,6 +15,7 @@ import ProfileScreen from './Screens/UpdatePass';
 import UpdatePass from './Screens/UpdatePass';
 import ResultScreen2 from './Screens/ResultScreen2';
 import DeviceScreen from './Screens/DeviceScreen';
+import StreamViewer from './Screens/StreamViewer';
 import { background } from './components/styles';
 
 const Stack = createStackNavigator(); 
@@ -27,6 +28,7 @@ export default function App() {
         <Stack.Screen name="Login2" component={Login2} />
         <Stack.Screen name="Home2" component={Home2} />
         <Stack.Screen name="DeviceScreen" component={DeviceScreen} />
+        <Stack.Screen name="StreamViewer" component={StreamViewer} />
         <Stack.Screen name ="ResultScreen2" component={ResultScreen2}/>
         <Stack.Screen name="Signup" component={SignUp} />
         <Stack.Screen name="ForgotPass" component={ForgotPass} />
