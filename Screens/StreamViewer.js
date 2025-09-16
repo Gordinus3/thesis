@@ -34,7 +34,9 @@ export default function StreamViewer({ navigation }) {
       updateStatus("Connecting...");
       setConnected(false);
 
-      const pc = new RTCPeerConnection({ iceServers: [] });
+      const pc = new RTCPeerConnection({ iceServers: [
+        {urls: "stun:stun.l.google.com:19302"}
+      ] });
       pcRef.current = pc;
 
       pc.ontrack = (event) => {

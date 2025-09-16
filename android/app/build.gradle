@@ -6,6 +6,12 @@ apply plugin: "com.facebook.react"
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
+
+project.ext.react = [
+    entryFile: "index.js",      
+    bundleInRelease: true       
+]
+
 react {
     /* Folders */
     //   The root of your project, i.e. where "package.json" lives. Default is '../..'
@@ -56,8 +62,9 @@ react {
 
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
+ * ✅ Changed from false → true, because WebRTC needs keep rules in release.
  */
-def enableProguardInReleaseBuilds = false
+def enableProguardInReleaseBuilds = true
 
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
@@ -84,7 +91,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 4
         versionName "2.2.0"
+        multiDexEnabled true
     }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -92,28 +101,36 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-    }
+        release {
+            // ✅ Make sure to generate your own keystore file for production
+            // see https://reactnative.dev/docs/signed-apk-android
+            if (project.hasProperty("MYAPP_RELEASE_STORE_FILE")) {
+                storeFile file(MYAPP_RELEASE_STORE_FILE)
+                storePassword MYAPP_RELEASE_STORE_PASSWORD
+                keyAlias MYAPP_RELEASE_KEY_ALIAS
+                keyPassword MYAPP_RELEASE_KEY_PASSWORD
+            }
 
-    signingConfigs {
-    release {
-        storeFile file("../app/my-release-key.jks")
-        storePassword System.getenv("MYAPP_RELEASE_STORE_PASSWORD")
-        keyAlias System.getenv("MYAPP_RELEASE_KEY_ALIAS")
-        keyPassword System.getenv("MYAPP_RELEASE_KEY_PASSWORD")
+        }
     }
-}
 
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            // ✅ Use your release keystore instead of debug
+            signingConfig signingConfigs.release
+            shrinkResources true
             minifyEnabled enableProguardInReleaseBuilds
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
+    }
+
+    packagingOptions {
+        // ✅ Avoid duplicate .so errors with WebRTC + RN
+        pickFirst "lib/**/libjsc.so"
+        pickFirst "lib/**/libc++_shared.so"
     }
 }
 
@@ -121,6 +138,7 @@ dependencies {
     implementation project(':react-native-zeroconf')
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
     implementation("com.google.firebase:firebase-analytics")
+
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 

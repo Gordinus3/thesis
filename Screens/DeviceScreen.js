@@ -41,12 +41,6 @@ const DeviceScreen = ({navigation}) => {
   const pc = useRef(null);
 
   useEffect(() => {
-    (async () => {
-      await PermissionsAndroid.requestMultiple([
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-      ]);
-    })();
 
     changeNavigationBarColor("transparent", true, true);
 

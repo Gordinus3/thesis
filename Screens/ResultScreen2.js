@@ -190,7 +190,7 @@ const ResultScreen2 = () => {
               ) : (
                 <View style={{ alignItems: "center", marginTop: 10 }}>
                   <Image
-                    source={require("./../images/box.png")}
+                    source={require('./../images/box.png')}
                     style={{ width: 60, height: 60, marginRight: 15 }}
                   />
                   <Text

@@ -233,7 +233,7 @@ const Home2 = ({ navigation }) => {
               <TouchableOpacity onPress={() => navigation.navigate("DeviceScreen")}>
                 <DeviceCard>
                   <Image
-                    source={require("./../images/device.png")}
+                    source={require('./../images/device.png')}
                     style={{ width: 60, height: 60, marginRight: 15 }}
                   />
                   <View>
