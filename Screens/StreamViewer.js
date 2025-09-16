@@ -65,7 +65,7 @@ export default function StreamViewer({ navigation }) {
       await pc.setLocalDescription(offer);
 
       // 🔹 Build WHEP URL using rpiIp
-      const url = `http://${ip}:8889/stream/whep`;
+      const url = `http://microvision.local:8889/stream/whep`;
 
       const response = await fetch(url, {
         method: "POST",
